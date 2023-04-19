@@ -4,5 +4,11 @@ Project for the course of Laboratory of Computational Human Genomics held by Dem
 
 * [Useful link for porject](https://github.com/enricofrigoli/chg_project/tree/main/script)
 
+Project developed by: 
+  * Andrea Tonina  [@iamandreatonina](https://github.com/iamandreatonina)
+  * Gloria Lugoboni [@GloriaLugoboni](https://github.com/GloriaLugoboni)
+  * Lorenzo Santarelli [@Lor-Santa](https://github.com/Lor-Santa)
+
+
 
 
