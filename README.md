@@ -1,4 +1,4 @@
-# :dna: Human Genomics Demichelis
+# :dna: Computational Human Genomics Project
 
 Project for the course of Laboratory of Computational Human Genomics held by Demichelis Francesca and Yari Ciani (A.Y. 2022-2023).
 
