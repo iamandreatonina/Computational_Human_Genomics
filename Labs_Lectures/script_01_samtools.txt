@@ -1,0 +1,188 @@
+19/04
+
+Start the virtual machine -> we can go back to the last snapshot/state of the machine -> properties -> current state
+
+We are going to use:
+-Normal.sam -> SAM format: information on the alignment in the text format
+-Tumor.sam
+-CG100.bed -> The BED (Browser Extensible Data) format is a text file format used to store genomic regions as coordinates and associated annotations.
+
+We could open them with a text editor but they are quite big so it is not really that useful!
+
+SAMTOOL -> tool to manage bam and sam files
+
+1. Open in the terminal the DATA folder containing the .sam files and the .bed file
+
+Command: cd Data to move inside the directory
+
+Command: ls -la -> list of files plus other info
+
+Command: ls -lha -> list of files with also the info on the size
+
+Command: clear -> if the terminal is a mess!
+
+2. Have a look at the .sam file -> command head Normal.sam
+
+@HD     VN:1.4  GO:none SO:coordinate
+@SQ     SN:1    LN:249250621
+@SQ     SN:2    LN:243199373
+@SQ     SN:3    LN:198022430
+
+The header contains:
+- Version (VN)
+- Sorting
+- Read groups with platform information
+- Reference sequences used for the mapping: SN:chromosome_number LN: lengths
+- Processing history → program used: ID:name_program
+
+3. Call samtools (here in version 1.7) -> samtools or samtools -help -> Show us the help of the command
+There are different parameters that can be used:
+- One is flags -> explain bam flags -> example of usage: samtools flag 165 -> we get an explanation
+
+
+4. SAMTOOLS DEFAULT OPERATIONS
+- By default samtools (not all operations) expects a BAM file as input and will produce a SAM file as output
+
+- Alignment results are typically stored as a sorted and indexed BAM file
+
+- Aligners produce SAM files so our first job is usually to convert those to BAM formats.
+
+5. SAM to BAM
+- Convert a SAM into a BAM: samtools view -Sbh Normal.sam > Normal.bam
+
+If we don't add the > Normal.bam, the output will be printed to the terminal
+samtools view -> tells us the usage -> samtools view [options] <is.bam>
+-S -> input format is auto detected
+-b -> output a .bam file
+-h -> include the header in the file
+
+- Sort a BAM file: samtools sort Normal.bam > Normal.sorted.bam
+The default is to sort by position.
+We use the command samtools sort.
+
+- Create index: samtools index Normal.sorted.bam
+We use samtools index -> create an index file for the specific .bam file in input -> the index file is used by other softwares to retrive information about the bam and sam files
+Create a .bai file -> need to be in the same folder of the .bam file because the softwares look for the .bam file and then look for a .bai file with the same name of the .bam file!
+
+SORTING
+Way of sorting:
+- Sorted so that read pairs are next to one another (typically the same order as the FastQ
+file) -> sorted by the name of te reads
+- Sorted by alignment position
+- Depending on the next analysis method your file has to be sorted a certain way -> depending on the used softwares (even though usually we sort by position -> faster)
+
+Compare the two sortings:
+samtools sort -n Normal.bam > Normal.sorted.rname.bam
+-n -> to sort based on the name of the reads
+Create a new .bam file sorted by the name of the reads and not by the position (=default option for samtools sort)
+If we want to use it with an index, we need to create a specific index for it. The index made on the sort by position doesn't work on the bam file sorted by read name.
+
+
+samtools view Normal.sorted.bam | less
+We use the command samtools view -> using the pipe less we only print a part of the file created via samtools view
+
+The info we have:
+-ID name
+-flag
+-chromosome reference
+-position on the chromosome
+We can see that a lot of reads map in the same position in the chromosome reference
+-CIGAR
+
+samtools view Normal.sorted.rname.bam | less
+The info is the same, just we don't start from chromosome 1 as in the position sorting but, since the sorting is based on the read name, it is easier to find pair of reads
+
+
+5. FILTERING
+We can filter the reads based on flags:
+- Required flag (keep the reads if the flag matches): samtools view -f INT -> need the flag number 
+- Filtering (remove the read if the flag matches, keep everything aside the matched reads): samtools view -F INT -> need the flag number
+
+Example:
+samtools view -f 163 
+samtools view -F 163 
+This is a fast way to filter the reads based on flags
+NB not all numbers exist as flags
+
+Count reads in BAM file: samtools view -c Normal.sorted.bam
+-c -> counts the read in the file
+
+Reads that map to reverse strand: samtools view -c -f 16 Normal.sorted.bam
+We can combine -c and -f -> count only the reads with the specific flags choosen
+
+Reads that map to the forward strand: samtools view -c -F 16 Normal.sorted.bam
+
+NB. sometimes the number of the maps are not equal -> depends if every reads have the mate of the pair end sequencing
+
+Reads that have a mapping quality >30: samtools view -c -q 30 Normal.sorted.bam
+-q -> treshold for the quality of the reads -> here we filter for reads with quality > 30
+
+
+6. Explore statistics
+
+- General statistics : samtools flagstat Normal.sorted.bam
+samtools flagstat -> gives info on the statistics of the alignment, such as if there are duplicates, secondary or supplementary reads, etc.
+Usually, these statistis change as the analysisi is operated -> for example, happen often on duplicates because right now we did't operate any analysis on them so tehy are counted as 0.
+
+- Detailed statistics: use samtools stats
+samtools stats Normal.sorted.bam > Stats.txt
+less Stats.txt
+
+More detailed file-> like quality of all the cycle of sequencing
+Useful -> in the different regions of teh file tehre are specific ways to extract info using the command grep -> there are suggestions on how to do this in the output file  -> like use grep .....
+
+7. Explore coverage statistics
+
+- Single base sum coverage per region:
+samtools bedcov CG100.bed Normal.sorted.bam > BEDCov.txt
+
+The .bad file is a text file -> less CG100.bed -> columns: chromosome, start, end, name/annotation -> a text file that gives us the coordinates of a region, each associated to a specific name.
+We can use these files to filter our files.
+
+samtools bedcov is used to have an idea on how many reads of the .bam map on the region kept in the .bed file
+
+
+less BEDCov.txt
+
+Output file: same region of the .bed plus another columns indicating the number of reads mapping in that region
+
+
+
+- Single base depth
+samtools depth -b CG100.bed Normal.sorted.bam > BEDDepth.txt
+samtools depth give us the coverage on each base included in the .bad regions
+
+
+less BEDDepth.txt
+We don't have the regions and the number of reads mapping there.
+Here we get the number of reads that map in the nucleotide that are found in each region in the .bed file -> coverage on each specific base-> mapping of reads respect to each nucleotide of the regions in the .bed file -> nucleotide for nucleotide
+What we have in the output: chromosome, position of the nucleotide in the chromosome, coverage
+
+8. mpileup
+
+Test mpileup: samtools mpileup Normal.sorted.bam | less
+
+Pileup of a region: samtools mpileup -r 1:3410684-3410690 Normal.sorted.bam
+
+Control base and mapping quality:  samtools mpileup -r 1:3410684-3410690 -q 60 -Q 60
+Normal.sorted.bam
+
+
+9. Tasks
+
+Repeat previous commands on file Tumor.sam
+
+Check pileup of following positions
+– 1:196642233
+– 10:114192285
+– 17:7578265
+– 3:128204654
+
+and comment results (compare Normal and Tumor)
+
+Test if results change by filtering reads on base and mapping quality
+
+
+
+
+
