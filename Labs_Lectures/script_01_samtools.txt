@@ -102,7 +102,7 @@ Example:
 samtools view -f 163 
 samtools view -F 163 
 This is a fast way to filter the reads based on flags
-NB not all numbers exist as flags
+NB not all numbers exist as flags -> we don't get an error though -> print nothing
 
 Count reads in BAM file: samtools view -c Normal.sorted.bam
 -c -> counts the read in the file
@@ -159,30 +159,50 @@ Here we get the number of reads that map in the nucleotide that are found in eac
 What we have in the output: chromosome, position of the nucleotide in the chromosome, coverage
 
 8. mpileup
+-> generate a pileup of the .bam -> a type of file that contains the same info of teh bam but in a different way -> from the point of view of a single base -> each line is a position in the genome -> for each position we have the number of reads covering that position and all the bases covering it
 
-Test mpileup: samtools mpileup Normal.sorted.bam | less
 
-Pileup of a region: samtools mpileup -r 1:3410684-3410690 Normal.sorted.bam
+- Test mpileup: samtools mpileup Normal.sorted.bam | less
 
-Control base and mapping quality:  samtools mpileup -r 1:3410684-3410690 -q 60 -Q 60
+Column 1: chromosome
+Column 2: position
+Column 3: letter that we expect from teh reference genome
+-> N = none -> if we don't run the command samtools mpileup with the reference genome we don't get a reference nucleotide associated to the position
+-> if we run the command samtools mpileup with a reference genome, we get for each position the nt we have in that specific position so we have an idea on the bases that is expected to be found in the reads -> we can see if there are some SNP in the reads that map in that position 
+Column 4: # reads mapping in that specific bases
+Column 5: nuclotides that can be fount in the reads that map in that bases
+-> if we have all G that means that all the reads that map in that specific position have a G there
+Column 6: quality of the bases
+
+- Pileup of a region: samtools mpileup -r 1:3410684-3410690 Normal.sorted.bam
+with the -r we specify a region -> coordinates - chromosome 1, positions 3410684-3410690
+
+
+- Control base and mapping quality:  samtools mpileup -r 1:3410684-3410690 -q 60 -Q 60
 Normal.sorted.bam
+with -q we set a treshold on the quality of the BaseQ
+with -Q we set a treshold on the quality of the mapQ
 
 
 9. Tasks
 
 Repeat previous commands on file Tumor.sam
 
+Stats.txt: no duplicates, pair end sequencing, circa 750.000 reads, avarage quality of 34.9. 
+
+Coverage statistics -> Single base sum coverage per region -> coverage reads per region in .bed
+
+pileup -> $ indicate the end of the read, ^ or ] indicate the beginning of the read
+
 Check pileup of following positions
-– 1:196642233
-– 10:114192285
-– 17:7578265
-– 3:128204654
+– 1:196642233, Normal: 34 reads mapping, Tumor: 75 reads mapping
+– 10:114192285 -> possible nucleotides: G or A, not an only nucleotide -> with different quality score. Differences between Normal and Tumor: number of reads mapped
+– 17:7578265 -> sequence of A in Normal, sequence of G in Tumor
+– 3:128204654 -> sequence of C in Normal, sequence of T and C in Tumor
 
 and comment results (compare Normal and Tumor)
 
 Test if results change by filtering reads on base and mapping quality
-
-
-
+Nothing changes if a treshold of 35 for the readQ is setted. Going higher with teh Quality on the reads (Q), we get a more stringet number of reads in the mapped regions -> we can see if SNPs are there because of low quality or because of really SNPs
 
 

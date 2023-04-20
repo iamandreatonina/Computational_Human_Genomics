@@ -1,0 +1,20 @@
+Text file: Realigment_Commands.txt:
+
+1) Sort the BAM: samtools sort Sample.bam > Sample.sorted.bam
+
+2) Create BAM index:
+samtools index Sample.sorted.bam
+
+3) Realign the BAM - No input of known indels:
+a) Create the .intervals: 
+java -jar ../../Tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -o realigner.intervals -L ../../Annotations/CancerGenesSel.bed
+
+b) Perform the realignemnt:
+java -jar ../../Tools/GenomeAnalysisTK.jar -T IndelRealigner -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -targetIntervals realigner.intervals -o Sample.sorted.realigned.bam -L ../../Annotations/CancerGenesSel.bed
+
+All the positions in which there is a hodden indel are now realigned -> all contained in the file .realigned.bam
+
+4) Count how many reads were realigned:
+ samtools view Sample.sorted.dedup.realigned.bam | grep OC | wc -l
+
+
