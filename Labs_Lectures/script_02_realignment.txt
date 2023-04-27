@@ -9,12 +9,21 @@ samtools index Sample.sorted.bam
 a) Create the .intervals: 
 java -jar ../../Tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -o realigner.intervals -L ../../Annotations/CancerGenesSel.bed
 
+---> -o is used to tell the software the name of the output file -> the output is a series of intervals
+---> always same syntax
+---> -R -> path of the reference (fasta of the human genome)
+
 b) Perform the realignemnt:
 java -jar ../../Tools/GenomeAnalysisTK.jar -T IndelRealigner -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -targetIntervals realigner.intervals -o Sample.sorted.realigned.bam -L ../../Annotations/CancerGenesSel.bed
 
 All the positions in which there is a hodden indel are now realigned -> all contained in the file .realigned.bam
 
-4) Count how many reads were realigned:
- samtools view Sample.sorted.dedup.realigned.bam | grep OC | wc -l
+---> we use the intervals using the option -targetIntervals
+---> we obtained a realigned .bam file -> realignment in the regions of indels and regions that may hidden some indels
 
+4) Count how many reads were realigned:
+ samtools view Sample.sorted.realigned.bam | grep OC | wc -l
+-> with samtools view we can look inside a .bam file
+-> the flag OC stand for OriginalCigar -> we can use grap to perform pattern searching
+-> we count the lines of teh outputs via wc -l -> total obtained: 616 -> corresponds to the number of reads that have been realigned.
 

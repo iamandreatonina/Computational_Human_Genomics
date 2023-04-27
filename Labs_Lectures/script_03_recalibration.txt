@@ -1,0 +1,50 @@
+27/04
+
+NB. the algorithm works in the directory we are in -> better to move to a new directory and use the files we need from the previuos directory (with the .bam sorted file)
+
+Tasks
+- Recalibrate the previously realigned BAM
+- Create before_after plots for recalibration
+- Count the fraction of reads that had base recalibration
+
+1) Base Recalibrator
+
+-> COULD BE USEFUL: https://gatk.broadinstitute.org/hc/en-us/articles/360035890531-Base-Quality-Score-Recalibration-BQSR-
+
+COMMAND:
+java -jar ../../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../../Annotations/human_g1k_v37.fasta -I ../../02_Realignment/Data/Sample.sorted.realigned.bam -knownSites ../../Annotations/hapmap_3.3.b37.vcf -o recal.table -L ../../Annotations/CancerGenesSel.bed
+
+-> we limit the execution only to certain region of teh genome -> specifically, it is a cancer genes region -> possible via the -L parameter
+
+EXAMPLE USAGE:
+-I my_reads.bam \
+-R reference.fasta \
+--known-sites sites_of_variation.vcf \
+--known-sites another/optional/setOfSitesToMask.vcf \
+-o recal_data.table
+
+
+Have a look at the table: less recal.table
+-> In output we have a file called recalTable -> a text file we can explore: beginning with general info, going down in the file we have all the recalibration values for teh groups, with event type (M for Mismatches, D for deletion, I for insertions), there is also the info stratified by the scores. Plus, there is the empirical quality scores -> that usually is lower than the original quality score.
+We can see that the machine cycles are not really impacting, while mismatches, deletions and insertions are -> have a look at the table and see which are the most imacting covariates.
+
+2) Creation of the new .bam file -> Print Reads
+java -jar ../../Tools/GenomeAnalysisTK.jar -T PrintReads -R ../../Annotations/human_g1k_v37.fasta -I ../../02_Realignment/Data/Sample.sorted.realigned.bam -BQSR recal.table -o Sample.sorted.realigned.recalibrated.bam -L ../../Annotations/CancerGenesSel.bed --emit_original_quals
+
+3) Generate the after recalibration table -> passage needed to operate Analyzer Covariates -> BaseRecalibator 2 -> Recalibration table 2.
+
+java -jar ../../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../../Annotations/human_g1k_v37.fasta -I ../../02_Realignment/Data/Sample.sorted.realigned.bam -knownSites ../../Annotations/hapmap_3.3.b37.vcf -BQSR recal.table -o after_recal.table -L ../../Annotations/CancerGenesSel.bed
+
+4) Generate the plots -> create i outout a pdf with all the plots
+
+java -jar ../../Tools/GenomeAnalysisTK.jar -T AnalyzeCovariates -R ../../Annotations/human_g1k_v37.fasta -before recal.table -after after_recal.table -csv recal.csv -plots recal.pdf
+ -> we can have a look at the recal.pdf -> we can see that there are different context possibles -> some biases can be observed when dealing with machine artefacts -> we can see that the after calibration line is more uniform.
+
+
+5) Have a look at the number of reads with the quality -> we recalibrate the original quality so, if we print the number of reads and the number of reads with the quality flag OQ, we can see that all the reads have been recalibrated in the quality value!
+ 
+samtools view Sample.sorted.realigned.recalibrated.bam | grep OQ | wc -l
+1387627
+
+samtools view Sample.sorted.realigned.recalibrated.bam | wc -l
+1387627
