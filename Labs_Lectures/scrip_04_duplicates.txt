@@ -1,0 +1,107 @@
+TASK
+1. Remove duplicates with Picard
+2. Remove duplicates with samtools
+3. Is the final number of reads the same?
+4. Compare coverage in region 19:496546-496566
+5. Calculate cardinality of intersection of reads result of the
+two methods
+6. Compare deduplication results before or after realignment and recalibration – Is consistent? Comment.
+
+
+DONE:
+Prepare the .bam file: sort + index
+- samtools sort Sample.bam > Sample.sorted.bam
+- samtools index Sample.sorted.bam 
+
+Use Picard MarkDuplicates:
+- java -jar ../../Tools/picard.jar MarkDuplicates I=Sample.sorted.bam O=Sample.sorted.dedup.bam REMOVE_DUPLICATES=true TMP_DIR=/tmp METRICS_FILE=Sample.picard.log ASSUME_SORTED=true
+
+--> input file: .bam file sorted and indexed
+--> output: 
+--> REMOVE_DUPLICATES as true because we want to remove them
+--> ASSUME_SORTED is true because the .bam is sorted
+
+--> open the .log file using calc (excel) - teh most important lines are the 7 and the 8, columns E and on, correspond to the summary of the removal of duplicates: contains the number of reads that are unpaired, the number of duplicates found, the number of unmapped. Plus also the percentage of duplicates and the optical duplicates and the non optical duplicates.
+
+- samtools index Sample.sorted.dedup.bam
+--> needed to index again the .bam file -> because it is a new .bam file so also the index need to be done again
+
+Use samtools instead of Picard -> need to do some preprocessing to teh files
+- samtools sort -n Sample.bam > Sample.nsorted.bam
+
+--> need the file sorted by the name of the reads -> cause it is easier to have teh mates all close together
+--> this passage need some time
+
+- samtools fixmate -m Sample.nsorted.bam Sample.nsorted.fixed.bam
+
+--> run samtools fixmate to create the tags and add them to the .bam file
+
+- samtools sort Sample.nsorted.fixed.bam > Sample.nsorted.fixed.sorted.bam
+
+--> need to sort by position -> needed because we need this format for samtools markdup
+
+- samtools markdup -sr Sample.nsorted.fixed.sorted.bam Sample.nsorted.fixed.sorted.dedup.bam
+
+--> -sr to remove duplicate reads and also report stats
+
+Compare the two output of picard and samtool -> need to first use samtools view to see the .bam files and then use wc -l to count the lines or we use the following commands
+
+- samtools flagstat Sample.sorted.dedup.bam
+
+--> on the first debup file from picard -> tells us the number total reads: 1733491 -> the percentage of duplicates where almost 15%
+
+- samtools flagstat Sample.nsorted.fixed.sorted.dedup.bam
+
+--> on the samtools markduplicated -> number of reads: 1548089 -> less than the picard -> small differences arise when using different tools -> because they treat differently the meates plus in this case since we need more steps on the input file of the samtool than it makes changes and returns slightly different results
+
+- samtools index Sample.sorted.dedup.bam
+
+
+- samtools index Sample.nsorted.fixed.sorted.dedup.bam
+
+
+- samtools mpileup -r 19:496546-496566 Sample.sorted.dedup.bam
+
+--> mpileup gives us a pileup file -> each line is a single position on the genome -> for each line we have the chromosome number, the position, the number of reads mapping (coverage) and the proper pileup: all the bases that are mapping in that position one after the other + the qualities. Capital letters and lower letters because of the forward or reverse strand.
+--> similar command that is a summary: bedcoverage
+
+- samtools mpileup -r 19:496546-496566 Sample.nsorted.fixed.sorted.dedup.bam
+
+--> we can see that the coverages are different to the picard file -> the process of adding the flags on the mates allow us to regain some reads
+
+
+Realignment
+
+Create the table for the position of indels/hidden indels
+- java -jar ../../Tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -o realigner.intervals
+
+
+Realign the indels based on the position of the indels
+- java -jar ../../Tools/GenomeAnalysisTK.jar -T IndelRealigner -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -targetIntervals realigner.intervals -o Sample.sorted.realigned.bam
+
+
+Generate the table
+- java -jar ../../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.realigned.bam -knownSites ../../Annotations/hapmap_3.3.b37.vcf -o recal.table
+
+
+Creation of the new .bam file -> Print Reads -> the bam files created have now the quality recalibrated
+- java -jar ../../Tools/GenomeAnalysisTK.jar -T PrintReads -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.realigned.bam -BQSR recal.table -o Sample.sorted.realigned.recalibrated.bam --emit_original_quals
+
+
+Run again the MarkDuplicates command but using the recalibrated .bam file!
+- java -jar ../../Tools/picard.jar MarkDuplicates I=Sample.sorted.realigned.recalibrated.bam O=Sample.sorted.realigned.recalibrated.dedup.bam REMOVE_DUPLICATES=true TMP_DIR=/tmp METRICS_FILE=Sample.sorted.realigned.recalibrated.picard.log ASSUME_SORTED=true
+
+- samtools index Sample.sorted.realigned.recalibrated.dedup.bam
+
+
+- samtools flagstat Sample.sorted.realigned.recalibrated.dedup.bam
+
+--> how many reads we have in the recalibrated file? 1733378> not a lot of difference respect to the MarkDuplicates not recalibrated -> the files we are analizing are small .bam files, normally we have much bigger files so the waiting needed to perform the recalibration is bigger -> do we really need to operate the recalibration?
+
+
+- samtools mpileup -r 19:496546-496566 Sample.sorted.dedup.bam
+
+
+- samtools mpileup -r 19:496546-496566 Sample.sorted.realigned.recalibrated.dedup.bam
+
+--> what changes respect to the not recalibrated file? The quality changes! The coverage is slightly different but the real change is the quality of the reads -> the whole recalibration process dosn't change a lot in teh number of duplicates found but the quality is really brought to a more real value -> so it is needed because before we were over-estimating it
