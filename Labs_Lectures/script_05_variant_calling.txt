@@ -1,0 +1,59 @@
+TASKS:
+1. Compute variant calling for Sample.sorted.bam file with both BCF and GATK approaches
+    a. Compare results
+2. Dedup, realign, recalibrate Sample.sorted.bam file e recompute variant calling
+    a. Compare results with previous ones 
+3. Change --min-meanDP value to 20 and compare results
+
+TASK 1
+
+1) lets move in the folder with the data for teh analysis
+
+cd Data
+
+2) Operate the variant calling using bcftools
+-> Bcftool pileup combined with a variant calling bcftool 
+
+bcftools mpileup -Ou -a DP -f ../../Annotations/human_g1k_v37.fasta Sample.sorted.bam | bcftools call -Ov -c -v > Sample.BCF.vcf
+
+-> Sample.BCF.vcf is the output file -> for the optional data we have all of them, specifically all the info PASSED and the reads map in the chromosome 20
+-> as output we get also a .log file that tells us if there were some errors in the computation
+
+3) Operate the variant calling using GATK
+
+java -jar ../../Tools/GenomeAnalysisTK.jar -T UnifiedGenotyper -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -o Sample.GATK.vcf -L chr20.bed
+
+-> we obtain as output Sample.GATK.vcf -> map on chr 20. Quality -> low quality
+
+4) The output of teh analysis is a VCF file so let's use vcftool to analyze it and work with it
+
+a) Filter variants on the quality -> treshold on the minimum quality at 20 and the coverage. First on the BCF.vcf
+
+vcftools --minQ 20 --max-meanDP 200 --min-meanDP 5 --remove-indels --vcf Sample.BCF.vcf --out Sample.BCF --recode --recode-INFO-all
+
+->  we get a .filtered.vcf
+
+b) Filter variants on the quality -> treshold on the minimum quality at 20 and the coverage. On the GATK.vcf
+
+vcftools --minQ 20 --max-meanDP 200 --min-meanDP 5 --remove-indels --vcf Sample.GATK.vcf --out Sample.GATK --recode --recode-INFO-all
+
+c)  Operate the comparison between the two files .vcf-> file. outdiff_files
+
+vcftools --vcf Sample.BCF.recode.vcf --diff Sample.GATK.recode.vcf --diff-site
+
+-> we get the info on each position for the read in both files -> we can compare the two files easily-> we can see the same event in both files? Same base call?
+
+TASK2: Dedup, realign, recalibrate Sample.sorted.bam file e recompute variant calling
+    a. Compare results with previous ones 
+
+
+
+TASK3: Change --min-meanDP value to 20 and compare results
+
+vcftools --minQ 20 --max-meanDP 200 --min-meanDP 20 --remove-indels --vcf Sample.BCF.vcf --out Sample.BCF --recode --recode-INFO-all
+
+
+vcftools --minQ 20 --max-meanDP 200 --min-meanDP 20 --remove-indels --vcf Sample.GATK.vcf --out Sample.GATK --recode --recode-INFO-all
+
+
+-> the limit on the coverage is higher so the number of reads in the .vcf file is dofferent

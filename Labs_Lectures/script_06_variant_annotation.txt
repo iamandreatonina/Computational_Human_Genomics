@@ -1,0 +1,69 @@
+TASKS:
+1. Annotate BCF and GATK variant calls VCF files (recoded ones) with hg19kg database
+2. Annotate with Hapmap and Clinvar pathogenic variants
+3. Compare stats
+4. Find in both files variants that have
+    a. HIGH impact
+    b. Coverage > 20
+    c. An rsID
+5. Which of these variants is annotated in Clinvar?
+
+
+Call SNPEffector using VCF files, for both BCF and GATK
+1) java -Xmx4g -jar ../Tools/snpEff/snpEff.jar -v hg19kg ../05_VariantCalling/Data/Sample.BCF.recode.vcf -s Sample.BCF.recode.ann.html > Sample.BCF.recode.ann.vcf
+
+-> We generate an annotate.vcf and a .html
+
+-> let's explore the annotated vcf file: it is a normal VCF file with all teh info and other info lines that hae been hadded to the header of teh metadata -> info added by SNPEffector -> the most important is the annotation lines -> at a certain point of the INFO string added by SNPEffector, we have a code ANN that contain the info, divided by the pipe |.  Some type of annotations are: protein_coding, intron_variant, missense_variant, moderate_effect, etc
+-> it is a text file so it can be read!
+-> we can extract the data creating a python code
+-> look at the html file to have an overview -> tells us the command line lounches, the warnings (=not a big deal), errors (= top if it is equal to 0), number of variants and number of lines -> there can be differences in these two lines, here for example, we analyze 7432 lines and 7447 variants -> this difference is because of teh multialleles -> here we have 50 cases that have more than 1 variant, so a multiple alleles. The analysis of annotation is operated on the variants so we can hav emore variants than lines in the files.
+We also have the genome length, the effective genome length -> differences because we used only the info on the chr 20 to generate the VCF files and the variant rate.
+Table of Number variant by types -> all SNPs -> we filtered against indels and insertions
+Summary and classifications of number of effects stratified by the impact -> biggest part of the effect predicted is modifier -> so unable to predict. After we have low and moderate effect -> not easy to predict the effect.
+Summary and classifications of number of effects stratified by the functional class -> majority are missense
+More detailed stratification of the effects divided by type and region (downstream, upstream, introns, splising sites, UTR regions, etc) -> here a big percentage of the calls fall in the intron region, 53%. Only 30% fall in the exonic regions -> a lot of time the calls are not happening in a sequence that give rise to a protein. So ot can be difficult to repdict the effect of these modification. Other modification can be found in the regulatory region, so the upstream regions -> change the level of expression of the proteins.
+Graph of the variations divided by type
+Quality summary -> min, max, mean, median, standard deviation, values and counts per values. Associated to a plot of the distribution of the values.
+Insertion and deletion length -> histogram -> here we don't have them because there are no ins or del -> we left them out when creating the VCF file.
+Matrix of the base changes for the SNPs -> we can see how often a base is changed into another base -> not an equal presentation -> not the same numbers for every change -> here a lot of time the C became A and G become T.
+Summary of teh changing of the bases in transition and transvertion. Can be used to operate Mutational signals analysis: association of specific mutation signature to specific diseases -> like smoke or liver damage -> the type of changes observed is the same.
+Allele frequency -> not super useful sometimes
+Allele count -> not super useful sometimes
+Hom/Het per sample -> not super useful sometimes
+Codon change -> the changes in codons that pairs with the amino acids changes table -> we can see which amino acid changed -> as the color gets more dark, the change of codon is observed more.
+Amino acids changes table 
+With all these info we can get an idea of what is happening in the sample -> bases that are changing and so on.
+Variants by chromosome -> specific for each chromosome -> we can see where the variants are accumulating in the actual sequence
+
+
+2) java -Xmx4g -jar ../Tools/snpEff/snpEff.jar -v hg19kg ../05_VariantCalling/Data/Sample.GATK.recode.vcf -s Sample.GATK.recode.ann.html > Sample.GATK.recode.ann.vcf
+
+
+-> compare the results with the VCF file -> teh number of variants here is lower. In this case, we have 84% of modifier and 61% of the SNPs are missense. Th emajority of teh variants are found in introns (=51%).
+We can say, that even if the numbers are a little different, the results are comparable and both tools give us an info that is comparable -> tehre is not a best one respect to the two of them.
+The main difference can be seen in the amino acid table
+
+Call Annotate -> additional passage on the vcf files. We use databases to add annotations
+
+3) java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/hapmap_3.3.b37.vcf  Sample.BCF.recode.ann.vcf > Sample.BCF.recode.ann2.vcf
+
+4) java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/clinvar_Pathogenic.vcf Sample.GATK.recode.ann2.vcf > Sample.GATK.recode.ann3.vcf
+
+
+5) java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/clinvar_Pathogenic.vcf Sample.BCF.recode.ann2.vcf > Sample.BCF.recode.ann3.vcf
+
+
+6) java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/hapmap_3.3.b37.vcf  Sample.GATK.recode.ann.vcf > Sample.GATK.recode.ann2.vcf
+
+
+-> let's open one file: annotate2 of BCF: We have a normal vcf file -> the info fields are populated one after the other, we have some new info and new annotations -> addition of annotation from the databases.
+We can see that the info lines are different between annotation 2 and annotation 3 files from teh same tool -> the string of the annotations are different because we used different databases and tools
+
+Filter teh files
+
+7) cat Sample.BCF.recode.ann3.vcf | java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar filter "(ANN[ANY].IMPACT = 'HIGH') & (DP > 20) & (exists ID)" -> there are 2: DP: 36, 23.
+8) cat Sample.GATK.recode.ann3.vcf | java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar filter "(ANN[ANY].IMPACT = 'HIGH') & (DP > 20) & (exists ID)" -> there are 3, DP: 46, 36, 23. 
+
+9) cat Sample.BCF.recode.ann3.vcf | java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar filter "(exists CLNSIG)"-> there is 1: Pathogenic.
+10) cat Sample.GATK.recode.ann3.vcf | java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar filter "(exists CLNSIG)" -> there are 3: Pathogenic.
