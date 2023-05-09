@@ -44,7 +44,7 @@ Variants by chromosome -> specific for each chromosome -> we can see where the v
 We can say, that even if the numbers are a little different, the results are comparable and both tools give us an info that is comparable -> tehre is not a best one respect to the two of them.
 The main difference can be seen in the amino acid table
 
-Call Annotate -> additional passage on the vcf files. We use databases to add annotations
+Call Annotate -> additional passage on the vcf files. We use databases to add annotations. We use two different annotation -> hapmap and clinvar
 
 3) java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/hapmap_3.3.b37.vcf  Sample.BCF.recode.ann.vcf > Sample.BCF.recode.ann2.vcf
 
@@ -60,10 +60,13 @@ Call Annotate -> additional passage on the vcf files. We use databases to add an
 -> let's open one file: annotate2 of BCF: We have a normal vcf file -> the info fields are populated one after the other, we have some new info and new annotations -> addition of annotation from the databases.
 We can see that the info lines are different between annotation 2 and annotation 3 files from teh same tool -> the string of the annotations are different because we used different databases and tools
 
-Filter teh files
+Filter the files -> filter the events -> filter for the position of the variants that satisfy the filter -> to carry on the analysis on only impacting and wanted variants
 
 7) cat Sample.BCF.recode.ann3.vcf | java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar filter "(ANN[ANY].IMPACT = 'HIGH') & (DP > 20) & (exists ID)" -> there are 2: DP: 36, 23.
 8) cat Sample.GATK.recode.ann3.vcf | java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar filter "(ANN[ANY].IMPACT = 'HIGH') & (DP > 20) & (exists ID)" -> there are 3, DP: 46, 36, 23. 
 
-9) cat Sample.BCF.recode.ann3.vcf | java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar filter "(exists CLNSIG)"-> there is 1: Pathogenic.
+NB using different tolls give rise to different results
+
+Under, we ask specifically for the annotation relative to the clinical significance -> CLNSIG
+9) cat Sample.BCF.recode.ann3.vcf | java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar filter "(exists CLNSIG)"-> there is 1 variant, that is associated to clinical significance: Pathogenic.
 10) cat Sample.GATK.recode.ann3.vcf | java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar filter "(exists CLNSIG)" -> there are 3: Pathogenic.

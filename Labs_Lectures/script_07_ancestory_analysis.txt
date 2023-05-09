@@ -1,0 +1,135 @@
+
+Exercise:
+
+cd Data
+
+ls # returns -> smartpca, faststructure, ethseq
+
+##### Run SMARTPCA
+
+1) go in SMARTPCA folder
+cd smartpca
+
+2) Convert the PED and MAP file into SMARTPCA input files -> teh two files 100s and 16s differs only in the number of samples they contains: 100  samples or 16 samples
+./EIG5.0.2/bin/convertf -p par.PED.EIGENSTRAT.100s
+./EIG5.0.2/bin/convertf -p par.PED.EIGENSTRAT.16s
+
+3) Run SMARTPCA analysis -> when we run it, it print the inpout files, the samples analyzed and the number of SNPs used. Plus, if a part of teh SNPs were lefted out/killed.
+# This analysis is PCA based so a summary of teh PCA is returned, with the eigenvector and the dimentions of SNPs and individuals.
+# Plus, a plot is returned, containing the SNPs
+./EIG5.0.2/bin/smartpca -p 1000GP_Genotypes100s.pca.par
+./EIG5.0.2/bin/smartpca -p 1000GP_Genotypes16s.pca.par
+
+cd ..
+
+##### Run EthSEQ
+
+1) go in the folder for ethseq
+cd ethseq
+
+2) run the script
+Rscript Run.R # there is a R script already implemented to operate the EthSEQ anlysis
+#  what the script look like? Look under in the R SCRIPT PART!
+# we get the outputs in teh folders:
+# -> RGraph.Output -> the PCA plots of teh target, model and teh refinement process. We can understand teh stratification of teh ethnicity ansd see if the samples fall in a specific subspace for a specific ethnicity
+# the 16s fiel is smaller tha n the 100s file -> only 16 points in the PCA plots
+# ->  the file RReport.PCA.Acord -> data of the report
+# -> file Rreport.txt-> file that tell us if each samples are inside a specific population subspace or near a specific population, each row is a sample
+
+
+cd ..
+
+##### Run fastSTRUCTURE
+
+cd faststructure
+
+## run the examples and create plots
+# the -k parameter is used to define the number of ethnicity we should start our analysis with -> deciding k can be difficult -> if we know that there is for sure a certain number of population, it will be easier. Defining k is difficult in unsupervised clustering, usually different approaches are used and a statistical analyisi is often associated to teh result to understand in the k is good. A treshold on the max k can be inserted -> so it is not needed to set a minimum k but a max k is selected
+# needed to run both structure.py and distruct.py code
+# the code can be find in the folder or at the end of the page.
+
+python fastStructure/structure.py -K 4 --input=1000GP_Genotypes100s --output=1000GP_Genotypes100s --full --seed=100
+python fastStructure/distruct.py -K 4 --input=1000GP_Genotypes100s --output=1000GP_Genotypes100s.svg
+python fastStructure/structure.py -K 4 --input=1000GP_Genotypes16s --output=1000GP_Genotypes16s --full --seed=100
+python fastStructure/distruct.py -K 4 --input=1000GP_Genotypes16s --output=1000GP_Genotypes16s.svg
+cd ..
+
+## Compare the tools EthSEQ and SMARTPCA
+1) Call R from teh terminal and open te AnalysisScript.R
+
+R SCRIPT for EthSEQ: Run.R in the folder
+
+library(EthSEQ)
+
+ethseq.Analysis(
+  target.vcf = "./1000GP_Genotypes100s.vcf",
+  out.dir = "./100s",
+  model.gds = "./ReferenceModel.gds",
+  cores=1,
+  verbose=TRUE,
+  composite.model.call.rate = 0.99,
+  space="3D")
+
+ethseq.Analysis(
+  target.vcf = "./1000GP_Genotypes16s.vcf",
+  out.dir = "./16s",
+  model.gds = "./ReferenceModel.gds",
+  cores=1,
+  verbose=TRUE,
+  composite.model.call.rate = 0.99,
+  space="3D")
+
+
+
+PYTHON SCRIPTS:
+1) STRUCTURE.PY
+2) DESTRUCT.PY
+
+
+
+Comparison Anlysis in R:
+
+
+folder = "~/Documents/HumanGenomics/07_AncestryAnalysis/Data/"
+setwd(folder)
+
+### 100 samples analysis -> upload teh results of the prevoius analysis in R using read.table -> we have the three files
+ethseq.coord = read.table(file.path(folder,"ethseq/100s/Report.PCAcoord"),sep="\t",as.is=T,header=T) # each line is a sample, each coord is a dimention -> a colum
+ethseq.report = read.table(file.path(folder,"ethseq/100s/Report.txt"),sep="\t",as.is=T,header=T) # report
+smartpca.coord = read.table(file.path(folder,"smartpca/1000GP_Genotypes100s.pca.evec"),as.is=T) # each line is a sample, plus we have different variable dimentions -> coordinates in the space
+
+## check samples order -> to be sure to compare sample 1 against sample 1 -> are the sample in the same position in all the files?
+all(ethseq.coord[,1]==smartpca.coord[,1])
+all(ethseq.report[,1]==smartpca.coord[,1])
+
+## plot PCA space -> we can plot the PCA of teh two (SMARTPCA and EthSEQ) and compare them
+par(mfrow=c(2,3),mar=c(4,4,4,1)) # to plot all toghether-> generate a window in which the plots will be included
+plot(ethseq.coord$EV1,ethseq.coord$EV2,pch=19,xlab="PCA1",ylab="PCA2",main="EthSEQ") 
+plot(ethseq.coord$EV2,ethseq.coord$EV3,pch=19,xlab="PCA2",ylab="PCA3",main="EthSEQ")
+plot(ethseq.coord$EV1,ethseq.coord$EV3,pch=19,xlab="PCA1",ylab="PCA3",main="EthSEQ")
+plot(smartpca.coord[,2],smartpca.coord[,3],pch=19,xlab="PCA1",ylab="PCA2",main="SMARTPCA")
+plot(smartpca.coord[,3],smartpca.coord[,4],pch=19,xlab="PCA2",ylab="PCA3",main="SMARTPCA")
+plot(smartpca.coord[,2],smartpca.coord[,4],pch=19,xlab="PCA1",ylab="PCA3",main="SMARTPCA")
+# on the bottom we have the plots for the SMARTPCA, on the top we have the plots for the EthSEQ.
+# For each we look at the first three dimentions -> explain the highes percentage of variance of teh data -> teh most informative dimentions -> the other dimentions explain less
+# we can see in all the plots 4 clusters, both in EthSEQ and SMARTPCA -> cearer definition in EthSEQ though. The PCA component 1 is not exactly teh same of SMARTPCA component 1 but in teh end what is found is the same.
+
+# comparing the PC component of the two tools
+par(mfrow=c(1,3),mar=c(4,4,4,1))
+plot(ethseq.coord$EV1,smartpca.coord[,2],pch=19,xlab="PCA1 (EthSEQ)",ylab="PCA1 (SMARTPCA)",main="EthSEQ/SMARTPCA")
+plot(ethseq.coord$EV2,smartpca.coord[,3],pch=19,xlab="PCA2 (EthSEQ)",ylab="PCA2 (SMARTPCA)",main="EthSEQ/SMARTPCA")
+plot(ethseq.coord$EV3,smartpca.coord[,4],pch=19,xlab="PCA3 (EthSEQ)",ylab="PCA3 (SMARTPCA)",main="EthSEQ/SMARTPCA")
+# PC1 of the two tolls are the same, PC2 are slightly different, for PC3 we can see a correlation. Going up in the dimension (=less variance explained), we have less similarity between the two tools
+
+## compare fastSTRUCTURE and EthSEQ report
+faststructure = read.table(file.path(folder,"faststructure/1000GP_Genotypes100s.4.meanQ"),as.is=T,header=F)
+ids =  read.table(file.path(folder,"faststructure/1000GP_Genotypes100s.fam"),as.is=T,header=F)
+faststructure$id = ids[,2]
+
+sel = ethseq.report$pop[which(ethseq.report$sample.id%in%faststructure[which(faststructure[,1]>=0.99),5])] # take the ids of the first population in EthSEQ and understand where these ids are in SMARTPCA -> are in the faststructure?
+unique(sel)
+sel = ethseq.report$pop[which(ethseq.report$sample.id%in%faststructure[which(faststructure[,1]<0.99),5])]
+unique(sel)
+
+table(sel) 
+
