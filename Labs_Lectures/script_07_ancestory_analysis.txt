@@ -1,4 +1,3 @@
-
 Exercise:
 
 cd Data
@@ -10,12 +9,12 @@ ls # returns -> smartpca, faststructure, ethseq
 1) go in SMARTPCA folder
 cd smartpca
 
-2) Convert the PED and MAP file into SMARTPCA input files -> teh two files 100s and 16s differs only in the number of samples they contains: 100  samples or 16 samples
+2) Convert the PED and MAP file into SMARTPCA input files -> the two files 100s and 16s differs only in the number of samples they contains: 100  samples or 16 samples
 ./EIG5.0.2/bin/convertf -p par.PED.EIGENSTRAT.100s
 ./EIG5.0.2/bin/convertf -p par.PED.EIGENSTRAT.16s
 
 3) Run SMARTPCA analysis -> when we run it, it print the inpout files, the samples analyzed and the number of SNPs used. Plus, if a part of teh SNPs were lefted out/killed.
-# This analysis is PCA based so a summary of teh PCA is returned, with the eigenvector and the dimentions of SNPs and individuals.
+# This analysis is PCA based so a summary of the PCA is returned, with the eigenvector and the dimentions of SNPs and individuals.
 # Plus, a plot is returned, containing the SNPs
 ./EIG5.0.2/bin/smartpca -p 1000GP_Genotypes100s.pca.par
 ./EIG5.0.2/bin/smartpca -p 1000GP_Genotypes16s.pca.par
