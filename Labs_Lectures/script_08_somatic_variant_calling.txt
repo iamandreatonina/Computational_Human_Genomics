@@ -1,0 +1,64 @@
+cd Data
+
+### Varscan
+
+## SNPs
+
+1) We perform a pileup of one file sorted.bam of the lesson 5 -> we generated a pilep file because ot is needed for the tool we are using in the point 2
+
+samtools mpileup -B -f ../../Annotations/human_g1k_v37.fasta ../../05_VariantCalling/Data/Sample.sorted.bam > Sample.sorted.pileup
+
+2) We use the tool mpileup2snp -> generate a cvf fiel that contains teh SNPs that are found in the pileup bam file
+
+java -jar ../../Tools/VarScan.v2.3.9.jar mpileup2snp Sample.sorted.pileup --p-value 0.01 --output-vcf 1 > Sample.VARSCAN.vcf
+# it is possible to change some threshold -> like the coverage and the minimum variance frequency. Plus we can change the statistical analysis using teh p-values. All teh filters used can be changed and all are printed to terminal.
+# tell us the number of SNPs found and the number of indels found
+
+3) Filter the file using vcftools -> we retain almost all the possible sites of teh SNPs : retain 2736 sites over 2829
+
+vcftools --max-meanDP 200 --min-meanDP 5 --remove-indels --vcf Sample.VARSCAN.vcf --out Sample.VARSCAN --recode --recode-INFO-all
+
+4) Compare two files: the recode.vcf obtained in the lesson 5 and the one obtained now
+
+vcftools --vcf ../../05_VariantCalling/Data/Sample.BCF.recode.vcf --diff Sample.VARSCAN.recode.vcf --diff-site
+
+# create the diff-site file in output > contains the following columns: chromosome, position in first file, position in the second file, in_file (1 or B=both), reference 1, reference 2, alternative 1, alternative 2. A dot is inserted if there is no call for that base
+# we get a print to the terminal -> found 2126 sites in common in both files
+
+
+## Somatic point mutations
+
+1) mpileup of the tumoral and normal .bam files -> we use two files: the tumor and the normal .bam file, we only select the chromosome 13-20 because these analysis are really long -> we focus on specific positions
+
+samtools mpileup -q 1 -f ../../Annotations/human_g1k_v37.fasta Normal_chr13_chr20.sorted.bam > Normal_chr13_chr20.sorted.pileup
+
+samtools mpileup -q 1 -f ../../Annotations/human_g1k_v37.fasta Tumor_chr13_chr20.sorted.bam > Tumor_chr13_chr20.sorted.pileup
+
+2) We run VarScan tool with the impostation somatic on the pileup files
+
+java -jar ../../Tools/VarScan.v2.3.9.jar somatic Normal_chr13_chr20.sorted.pileup Tumor_chr13_chr20.sorted.pileup --output-snp somatic.pm --output-indel somatic.indel --output-vcf 1
+
+# if we only have a tumor sample and not a normal sample we have the risk to misinterpret the data -> what can we do? We can use a pannel of normal samples -> we use like 1 0samples that are normal and the "normal event" is defined as a distribution of what is observed in the pannel.
+# The thresholds are printed
+# Some estimations are performed
+# There is a summary: number of position in tumor and shared in normal, number of reads with sufficien coverage, number of abberations: here we have: 2558 Germline, 269 LOH, 16 somatic and 12 unknown, 0 variant. 
+
+
+## Annotation-> to annotate the aberration events we found out
+
+1) Filter a bit more the somatic.pm.vcf
+ 
+vcftools --max-meanDP 200 --min-meanDP 30 --remove--indels --vcf somatic.pm.vcf --out somatic.pm --recode --recode-INFO-all
+
+
+2) we call snpEff-> create the annotation of the SNPs-> predict the SNPs
+
+java -Xmx4g -jar ../../Tools/snpEff/snpEff.jar -v hg19kg somatic.pm.vcf -s somatic.pm.vcf.html > somatic.pm.ann.vcf
+
+# -Xmx4g -> tells java how many giga of RAM can be used -> we can increase it if we have enough RAM
+
+2) We have a look at the annotation file -> ann.vcf
+
+cat somatic.pm.ann.vcf | java -Xmx4g -jar ../../Tools/snpEff/SnpSift.jar filter "(POS = 1896100)"
+
+# we look at position 1896100 -> part of the chromosome 20, all filter passed.

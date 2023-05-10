@@ -2,7 +2,7 @@ folder = "~/Documents/HumanGenomics/07_AncestryAnalysis/Data/"
 setwd(folder)
 
 ### 100 samples analysis -> upload teh results of the prevoius analysis in R using read.table -> we have the three files
-ethseq.coord = read.table(file.path(folder,"ethseq/100s/Report.PCAcoord"),sep="\t",as.is=T,header=T) # each line is a sample, each coord is a dimention -> a colum
+ethseq.coord = read.table(file.path(folder,"ethseq/100s/Report.PCAcoord"),sep="\t",as.is=T,header=T) # each line is a sample, each coord is a dimention of the PCA (Principal component/eigenvector) -> a colum
 ethseq.report = read.table(file.path(folder,"ethseq/100s/Report.txt"),sep="\t",as.is=T,header=T) # report
 smartpca.coord = read.table(file.path(folder,"smartpca/1000GP_Genotypes100s.pca.evec"),as.is=T) # each line is a sample, plus we have different variable dimentions -> coordinates in the space
 
