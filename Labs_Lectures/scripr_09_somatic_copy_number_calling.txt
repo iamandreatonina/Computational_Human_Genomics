@@ -1,0 +1,32 @@
+EX 1 -> RCode_DNAcopy.R
+
+To generate the data necessary for teh second part of R script we need to enter in teh folder Data -> cd Data -> follow the EX2
+
+Here we have two files: normal.bam and a tumor.bam, both already filtered to contain data on chr 13 and 20 and sorted.
+
+
+EX 2
+
+## Somatic copy number
+
+1) move in teh folder Data
+
+cd Data
+
+2) generate a pileup of the files-> one column of teh pileup is the coverage -> we are just making teh coverage available for the tool we are using after -> we are extracting teh info of the coverage
+
+samtools mpileup -q 1 -f ../../Annotations/human_g1k_v37.fasta Normal_chr13_chr20.sorted.bam Tumor_chr13_chr20.sorted.bam | java -jar ../../Tools/VarScan.v2.3.9.jar copynumber --output-file SCNA --mpileup 1
+
+3)  We use VarScan and explicit the copynumber tool -> to transform teh coverage in Copy Numbers
+
+java -jar ../../Tools/VarScan.v2.3.9.jar copyCaller SCNA.copynumber --output-file SCNA.copynumber.called
+
+# we can see the number of the regions that have a specific call: amplification, deletion, neutral. Plus we get the number of called that passed the thresholds
+# teh file contains the agjusted_logratio -> adjusted on the Copy number
+# the files now have a column with the call association for eeach read
+# here we are trying to call an event for each part of teh genome, we are not oerating a segmentation -> we are just analyzing the log2 ratio.
+# WE can use this info to perform Circular Segmentation!
+
+4) Run R script with DNAcopy segmentation
+
+Rscript CBS.R
