@@ -1,0 +1,122 @@
+1) Open IGV
+-> a human genome reference is open in default by IGV -> we can change it pressing on it and select the one we want (more option to see more possible genomes)-> GRCh37.hg19
+We can see on the bottom line in blue the densities of the genes.
+If we zoom in we see in blu the exons and the UTR, plus the introns.
+We also know the direction of teh transcription thanks to teh arrows present.
+We can also return to the initial page thanks to teh home button.
+
+File -> Load server -> Tutorial -> the UI Basic one
+
+We can zoom in and zoom out with dragging or with the cursor-> we can see that there are some signals like the methilation signals associated to our data. Zoomin in the signals get more intense. At high level of zoom letter start to appear at the bottom -> our reference genome.
+
+
+
+We can also click on the chr figure to go in a specific region
+We can also select a specific gene in the section near the chr box in teh high region near the sellection of the genome to use.
+We can also look at an entire chr -> to have a look on the possibility of insertion or deletion -> Copy number alterations
+
+Almost all the tracks in IGV can be viewed in different ways.
+
+We can decide to expand the Reference Genes at the bottom (in blue) -> tasto dx e select expand -> we can see more tracks -> annotated differently with different IDs -> depends on the isoforms -> differnt transcript of the genes. In the expanding visualization we can see all the different isoforms -> we can open the info of teh gene using the tasto dx on the isoform we want. In the collapsed visualization we collaps all teh isoforms in just one line -> we see all the exons
+There is a third visualization called squished -> when we have too many info on the isoforms and we want to represent them in a compacter way but less compacted than the collapsed visualization
+
+
+Comment image -> show details/data we are pointing at -> we set if we want t o see the info associated to the data or not when we pass above it.
+
+
+Exercize:
+1.
+
+2. Genomes > Load Genome from file -> chr1.fasta -> a FASTA that contains only info  chr 1
+# we do not need to select the .fai file (=indexing of the fasta), igv knows how to do it and search for it in the folder.
+
+We are in chr1 we cannot look at chr2 or other chr->we loaded the reference genome
+There is no gene track in the ruler under (blue distribution) -> we do not have info in teh genome
+
+3. a Load a gene annotation -> load a .bad file: File -> load from file -> refseq_chr1.bad
+# we now have genome ref info
+3. b Look at the gene CAPN9 -> find the genes!
+
+If we load a different genome reference -> problem!
+
+We can download the data in the genome browser UCSC Table Browser -> we can download all teh data that we need and upload in IGV -> we can select specific genes or specific genome parts like only promoters. We can use these as annotation.
+
+
+4. SNP visualization
+4.a load a SNP_calls.bed -> regions that contains SNPs
+
+We need to load the .bam file -> needed for the data
+The .bai is not needed to be downloaded ->IGV is able to understand it by default.
+
+Samples.bam.coverage -> IGV calculates on teh fly teh coverage and tell us -> on the top left there is also the scale of teh track. We can see that there are three peacks -> zoom in manually -> the peacks overlap SNPs we loaded -> the more we zoom in the more precision to the reads and bases we get.
+
+We can select a certain SNP -> SNP1 -> we can see the coverage at the single base -> like a pileup file -> plus we can see the bases.
+
+If we select the comment-popup we can see teh info -> we can now obtain info on the number of bases founded in the reads that map in that specific base position. If we select specifically a read we get all teh inf on it, eith also the CIGAR
+
+If we right click on a track (= on teh left side of teh viewer) -> we can:
+-> expand or squish the track
+-> in the expanded visualization we cam click on show all bases or show mismatches bases, show only bases with a certain quality.
+-> we can understand how much noise there is in teh data if with the visualization o fmismatches bases we select an entire chr
+-> looking at some bases by quality -> the bases with low quality are transparent.
+-> select group alignemnt -> group by concordance -> teh reads are grouped in categories (=discordant, concordant, etc). We can divide the reads onqualities 
+
+
+
+4.b  Go on SNP1 -> we have a high number of T in a specific region -> in the summary for that position we have a 58% of T and 40% of C -> since the T have a good quality, we can conclude that this SNP is heterozygus.
+
+We can color the alignemnt based on teh strand -> Tast dx ->group aligned by -> read strand  and than color aligned by -> read strand-> in this case, all teh alternative bases are in blue with teh minus strand -> we have a strand bias.
+
+5. Select the human genome 19
+
+5.b download teh RNA_SEQ data -> Load file -> RNASeq Data -> we have now two samples, one for heart and one for liver.
+
+5.c Go to teh gene SLC25A3 -> we can see the visualization -> we can see that we have a different coverage in teh two samples -> teh heart sample have a lot more coverage in one exon respect to another one in the liver -> the coverage changes because we hae two different isoforms -> two different tissues therefore two different transcripts.
+
+The red curved lines are the sashimi plots -> correspond to teh number of reads taht support that splicing point -> we can select on them and look specifically at the sashimi plot -> coverage of teh slicing poiny -> we can predict which transcript we have in teh sample
+
+6. Have a look at variants data
+
+6.a Load the variants data File -> Open Session -> vcf -> VCF_SESSION
+
+We can see that we have a lot of infos -> samples info plus abberation info
+
+6.b Go to the region AOL1:S342G -> we navigate to it -> on the bottom: the object we used -> we can group tracks by -> superpop ->to show teh super population annotation in teh annotation region near the sample region -> we have other annotations like sex, etc. Since we selected specifically teh super population we mantain only the annotation of teh super population and we define the reads associated to it.
+
+7. Upload teh genome GRch37/hg19 -> go on more and select it -> upload teh new genome
+
+TASK TO DO HERE ON THIS GENOME:
+
+1. Upload from folder: NA12878.mapped.ILLUMINA.bwa.CEU.high_coverage_pcr_free.RR.bam -> from file -> NA12878sub -> .bam file
+
+
+2. Inspect read pairs/end order/coverage/insert sizes at the following coordinates (hg19).
+Color alignment by -> insert size, pair orientation, etc -> based on what we are lookig at/interested in
+
+3. Interpret, if possible, as inversion, inverted duplication, tandem duplication, or deletion. (Color by pair orientation) -> Select these regions in the specific chromosomes.
+Suggestion -> remove the mismatch bases because they are not really helpful -> we are looking at structural rearrangements -> inversions, translocations, tandem duplications, and more complex events
+Plus, change the color alignment by -> to understand better -> example use the pair orientation -> sometimes teh reads have an orientation not expected.
+
+    1. Region 1 chr1:11,043,245-11,061,901 -> tandem duplication -> we can see that we have green reads that are in connected to a rigion with higher coverage, plus the pairs are diverging -> divergent pairs are an indication of tandem duplication.
+
+    2. Region 2 chr5:9,410,315-9,413,699 -> color by insert size -> some reads are colored in red -> if we explore them with teh comment-popup we can understand why they are colored in red -> we have a really big insert size -> means that we have a deletion -> also looking at the coverage we can understand that there is a deletion -> the insert size is bigger than what expected because when we map the reads to teh reference, teh insert size calculated is bigger than what expected from teh original fragent of DNA teh reads are generated from -> because in teh DNA sequences teh parto of gene in which there is the deletion there is not -> so the obtained insertion size i sbigger than what expected.
+
+Reads colored in red -> if we pass teh mouse over them, we can see that the insert size is really big
+
+GO to track preferences: View -> alignemnts -> mapping quality threshold -> need to be setted at 0 -> to see also the low quality reads in transparent -> usually are represented with different colors
+
+track preference -> view as pairs-> we can look at the mates -> we look at the pairs of reads -> we can see that the red reads are associated to a mate and an insert size bigger than ezpected -> because we have a deletion !! When we map in the genome we overestimate the insert size respect to the one calculated from the original fragment used in the sequencing -> it is smoller because in that original segment of dna there is not the gene deleted.
+
+NB. in IGV each chromosome is associated to a color -> to understand if there were translocations
+
+
+
+
+    3. Region 3 chr7:31,576,117-31,599,940 -> squish it. We can see that we see some read pairs quite big, all accumulated in a specific region/poition + they are colored with a different color (=blue or green). If we pass over them with the mouse, we can see that we have -> big insert size and looking at the pair orientation -> r1 and r2 and f1 and f2 -> r is for reverse and f is for forward -> the blue pairs are both rewersed and for the green one are both forword -> we are looking at an inversion!! When we map, we are mapping in the wromg position -> the mate is opposite respect to what we expect.
+Plus, we can see that another event is hapening. There is a region in which the coverege is lower than the expected and the read coverage s lost -> we are probably looking at an inversion with a deletion inside of it.
+
+
+
+    4. Region 4 chr12:12,540,452-12,550,470 -> inversion
+
+    5. Region 5 chr5:79,041,411-79,054,952 -> complex event -> it is a mess, some reads are characterized by really big insertion sites. With this kind of distribution of teh reads, we can say that there is a structural variant, a mutation probably took place. It is probably an inversion that contains a tandem duplication. If in the project we get something like this, we can not have a 100% sure answer of what is happening just by looking at IGV -> we need to do assembly -> we try to obtain the original dna molecule creating it from scratch via assembly.

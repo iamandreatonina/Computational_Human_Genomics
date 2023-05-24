@@ -1,0 +1,38 @@
+EXERCISE:
+
+# find heterozygus SNPs
+
+bcftools mpileup -Ou -a DP -f ../Annotations/human_g1k_v37.fasta Normal_chr13_chr20.sorted.bam | bcftools call -Ov -c -v > Normal.BCF.vcf
+# we obtain a .bcf of teh normal sample Normal_chr13.sorted.bam -> first we do a pileup and then a bcftool call -> we obtain all the heterozygous snps present in a normal sample.
+# we use/whant heterozygus snps because they are the informative one! The homozygous one give us no information on gain or lost of an allele
+
+
+grep -E "(^#|0/1)" Normal.BCF.vcf > Normal.het.vcf
+
+
+# calculate read count per allele on teh heterozigus snps (these data will be used by Clonet)
+# we transform the data in a .txt file
+# we are looking only at certain regions> the heterozygus snps we found earlier
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T ASEReadCounter -R ../Annotations/human_g1k_v37.fasta -o Normal.csv -I Normal_chr13_chr20.sorted.bam -sites Normal.het.vcf -U ALLOW_N_CIGAR_READS -minDepth 20 --minMappingQuality 20 --minBaseQuality 20
+
+
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T ASEReadCounter -R ../Annotations/human_g1k_v37.fasta -o Tumor.csv -I Tumor_chr13_chr20.sorted.bam -sites Normal.het.vcf -U ALLOW_N_CIGAR_READS -minDepth 20 --minMappingQuality 20 --minBaseQuality 20
+
+# we have a normal and a tumor file .csv
+# normal.csv -> contains info on teh contig =the chromosome here), the position, the referance and alternative allele, the total counts and additional stats
+
+# Finding somatic events (these data will be used by TPES) -> TPES is a tool to estimate purity but uses SNVs data
+
+cd ~/Documents/HumanGenomics/08_SomaticVariantCalling/Data
+
+java -jar ../../Tools/VarScan.v2.3.9.jar somatic Normal_chr13_chr20.sorted.pileup Tumor_chr13_chr20.sorted.pileup --output-snp somatic.pm --output-indel somatic.indel
+
+
+# Lets gp to the Clonet.R script + examples.R -> examples.R contans other info on the plotting -> get better plots
+example1.R-> we have hemizygous deletions
+example2.R -> anaploid sample -> shift on the Log2R axis
+example4.R -> not possible to create the admixture
+example5.R -> there is one more cluster we cannot connect to any of the red dots -> we have two clusters of hemizygus deletions but the two are subclonals -> subclonal events -> we are looking at two different populations. Usually if we have clusters we cannot direct to a specific dot, we are looking at subclonal events -> move along teh beta value
+Clonet is able to give us an idea on teh subclonal events -> create an object with which, thanks to the command table(scna_clonality_table$clonality.status) -> retrive teh info on the clonal and subclonal
