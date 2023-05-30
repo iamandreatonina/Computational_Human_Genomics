@@ -1,0 +1,28 @@
+What are we gonna do -> look at the document in the drive for a full text
+
+1) Genomic studies -> used to explore oncology or other context -> need info o somatic events -> obtained via bulk sequencing, from different patients (=cohorts of circa 200 patients) -> in this way we have a significance with which we can answer specific biological/clinical questions.
+Here we will analyze a single patient -> caso of study -> we can obtain informative info if teh analysis is good enough.
+
+2) We start form .bam files (=tumor and control), identify all the somatic events (copy numbers, SNV, indels etc). We also need to run quality checks, sample identity checks, visual inspection and population charactherization (=identify the populations-etnicity). We need to use just the tool we studied -> no other tools required.
+AIM: study the patient and the somatic events.
+We can run all the analysis or run only a few, plus we need to choose which filters to apply and others.
+
+3) Notes: if we need to determine the genotype we can use ASEReadCounter -> use the threshold written in the document
+
+Please note that th eprovided .bam files are limited in genomic size -> some intermediary files may take too m uch space -> GB of files -> pay attention if we use the virtual machine -> expand teh space of teh machine or perform the analysis only to certain regions or use the parameter max_depth/max_coverage to limit the space (like 100 coverage) and time. Plus, remember that it is possible to set the number of threads.
+
+
+FORM OF THE PROJECT:
+max 4 pages, info on the fonts/size on the drive text. Figures with the related legends are needed -> at least 2 figures, max 4 figures -> we need to chose the results more relevant, select them and explain them in a detailed way -> need to explain the axis, what is teh input data, what each point in the plot is and what kind of statistical analysis was done if we did it!
+
+Must contain teh project rationale -> max 10 lines
+Computational workflow -> all the details to reproduce exactly the things we done, the input files, the tools used, etc
+Results with interpretation
+Criticism-Limitations -> max 10 lines, if it is necessary
+
+Groups of 3-4 students each.
+
+
+To complete this project and send the report before the exam -> send it 1 week before the exam or earlier.
+
+A part of the oral exam will be on this project -> why we did a certain analysis or why we obtained that data.

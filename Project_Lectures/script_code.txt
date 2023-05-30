@@ -1,0 +1,21 @@
+1) Quality control -> Recalibration:
+
+a) Base Recalibrator
+
+-> COULD BE USEFUL: https://gatk.broadinstitute.org/hc/en-us/articles/360035890531-Base-Quality-Score-Recalibration-BQSR-
+
+COMMAND:
+java -jar ../../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../../Annotations/human_g1k_v37.fasta -I ../../02_Realignment/Data/Sample.sorted.realigned.bam -knownSites ../../Annotations/hapmap_3.3.b37.vcf -o recal.table -L ../../Annotations/CancerGenesSel.bed
+
+-> we can limit the execution only to certain region of teh genome -> specifically, it is a cancer genes region -> possible via the -L parameter
+
+2) Creation of the new .bam file -> Print Reads
+java -jar ../../Tools/GenomeAnalysisTK.jar -T PrintReads -R ../../Annotations/human_g1k_v37.fasta -I ../../02_Realignment/Data/Sample.sorted.realigned.bam -BQSR recal.table -o Sample.sorted.realigned.recalibrated.bam -L ../../Annotations/CancerGenesSel.bed --emit_original_quals
+
+3) Generate the after recalibration table -> passage needed to operate Analyzer Covariates -> BaseRecalibator 2 -> Recalibration table 2.
+
+java -jar ../../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../../Annotations/human_g1k_v37.fasta -I ../../02_Realignment/Data/Sample.sorted.realigned.bam -knownSites ../../Annotations/hapmap_3.3.b37.vcf -BQSR recal.table -o after_recal.table -L ../../Annotations/CancerGenesSel.bed
+
+4) Generate the plots -> create i outout a pdf with all the plots
+
+java -jar ../../Tools/GenomeAnalysisTK.jar -T AnalyzeCovariates -R ../../Annotations/human_g1k_v37.fasta -before recal.table -after after_recal.table -csv recal.csv -plots recal.pdf

@@ -16,7 +16,7 @@ java -jar ../../Tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R ../../An
 b) Perform the realignemnt:
 java -jar ../../Tools/GenomeAnalysisTK.jar -T IndelRealigner -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -targetIntervals realigner.intervals -o Sample.sorted.realigned.bam -L ../../Annotations/CancerGenesSel.bed
 
-All the positions in which there is a hodden indel are now realigned -> all contained in the file .realigned.bam
+All the positions in which there is a hidden indel are now realigned -> all contained in the file .realigned.bam
 
 ---> we use the intervals using the option -targetIntervals
 ---> we obtained a realigned .bam file -> realignment in the regions of indels and regions that may hidden some indels

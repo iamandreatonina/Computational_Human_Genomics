@@ -1,0 +1,102 @@
+Analysis Protocol:
+
+1) Sort and index the bam files
+
+- Sort a BAM file: samtools sort Control.bam > Control.sorted.bam
+The default is to sort by position.
+Did the same for the Tumor.bam
+
+- Create index: samtools index Control.sorted.bam
+The index file is used by other softwares to retrieve information about the bam and sam files
+
+- Count reads in BAM file:
+
+samtools view -c Tumor.sorted.bam -> we have 15039503 reads
+samtools view -c Control.sorted.bam -> we have 19720171 reads
+
+Reads that have a mapping quality >x:
+
+x=30:
+samtools view -c -q 30 Tumor.sorted.bam -> we have 11678731 reads
+samtools view -c -q 30 Control.sorted.bam -> we have 15210703 reads
+
+-q -> threshold for the quality of the reads -> here we filter for reads with quality > 30
+
+x=25:
+samtools view -c -q 25 Tumor.sorted.bam -> we have 12020882 reads
+samtools view -c -q 25 Control.sorted.bam -> we have 15703445 reads
+
+We can easily state that the reads are associated with high quality.
+
+- Explore statistics
+a) General statistics : samtools flagstat Control.sorted.bam
+
+Control:
+99.75% mapped
+0.23% singletons
+10030 reads with mate mapped to a different chr (with mapQ>=5)
+
+Tumor:
+99.96% mapped
+0.03% singletons
+7572 reads with mate mapped to a different chr (with mapQ>=5)
+
+We need to operate an analysis on the transversion-have a look in IGV to see if we have something
+
+b) Detailed statistics: samtools stats Control.sorted.bam > stat.control.txt;  less stat.control.txt
+
+Control:
+avarage quality: 31.4
+pairs with other orientation: 2586
+inser size standard deviation: 75.3 with an avarage insert size of 216.1 -> probably have deletions!
+
+Tumor:
+avarage quality: 31.4
+pairs with other orientation: 2586
+inser size standard deviation: 75.3 with an avarage insert size of 216.1 -> probably have deletions!
+
+
+More detailed file-> like quality of all the cycle of sequencing
+Useful -> in the different regions of teh file tehre are specific ways to extract info using the command grep -> there are suggestions on how to do this in the output file  -> like use grep .....
+
+- Explore coverage statistics
+
+2) Realignment
+ 
+Realign the BAM - No input of known indels:
+a) Create the .intervals: 
+java -jar ../../Tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -o realigner.intervals -L ../../Annotations/CancerGenesSel.bed
+
+---> -o is used to tell the software the name of the output file -> the output is a series of intervals
+---> always same syntax
+---> -R -> path of the reference (fasta of the human genome)
+
+b) Perform the realignemnt:
+java -jar ../../Tools/GenomeAnalysisTK.jar -T IndelRealigner -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -targetIntervals realigner.intervals -o Sample.sorted.realigned.bam -L ../../Annotations/CancerGenesSel.bed
+
+All the positions in which there is a hidden indel are now realigned -> all contained in the file .realigned.bam
+
+---> we use the intervals using the option -targetIntervals
+---> we obtained a realigned .bam file -> realignment in the regions of indels and regions that may hidden some indels
+
+4) Count how many reads were realigned:
+ samtools view Sample.sorted.realigned.bam | grep OC | wc -l
+-> with samtools view we can look inside a .bam file
+-> the flag OC stand for OriginalCigar -> we can use grap to perform pattern searching
+-> we count the lines of teh outputs via wc -l -> total obtained: 616 -> corresponds to the number of reads that have been realigned.
+
+
+
+2) Quality control -> Recalibration:
+
+4 steps:
+
+1. BaseRecalibrator: model the error modes and recalibrate qualities. Its inputs are a BAM file and the known sites. → based on the covariates, generate a BaseRecalibrator Table that tells us how much correction was needed.
+
+2. PrintReads: write recalibrated data to a BAM file thanks to the recalibration table produced in the previous step. Original qualities are retained with the OC flag.
+
+3. The process is repeated to build the after model to evaluate remaining error.
+
+4. AnalyzeCovariates: before and after plots are made based on recalibration tables.
+
+We could filter for the quality?
