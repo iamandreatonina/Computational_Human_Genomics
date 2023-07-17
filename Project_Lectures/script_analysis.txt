@@ -28,7 +28,7 @@ samtools view -c -q 25 Control.sorted.bam -> we have 15703445 reads
 
 We can easily state that the reads are associated with high quality.
 
-- Explore statistics
+- Explore statistics-> nb no info on duplicates or quality because we didn't do an analysis on duplicates yet
 a) General statistics : samtools flagstat Control.sorted.bam
 
 Control:
@@ -46,57 +46,104 @@ We need to operate an analysis on the transversion-have a look in IGV to see if 
 b) Detailed statistics: samtools stats Control.sorted.bam > stat.control.txt;  less stat.control.txt
 
 Control:
-avarage quality: 31.4
-pairs with other orientation: 2586
-inser size standard deviation: 75.3 with an avarage insert size of 216.1 -> probably have deletions!
+avarage quality: 30.4
+pairs with other orientation: 3280
+inser size standard deviation: 79.4 with an avarage insert size of 235.5 
 
 Tumor:
 avarage quality: 31.4
 pairs with other orientation: 2586
-inser size standard deviation: 75.3 with an avarage insert size of 216.1 -> probably have deletions!
+inser size standard deviation: 75.3 with an avarage insert size of 216.1 
 
 
-More detailed file-> like quality of all the cycle of sequencing
-Useful -> in the different regions of teh file tehre are specific ways to extract info using the command grep -> there are suggestions on how to do this in the output file  -> like use grep .....
+c) Explore coverage statistics
+- Single base sum coverage per region:
+samtools bedcov Captured_Regions.bed Control.sorted.bam > BEDCov.Control.CR.txt
+samtools bedcov Captured_Regions.bed Tumor.sorted.bam > BEDCov.Tumor.CR.txt
 
-- Explore coverage statistics
+Captured_Regions.bed -> contains info on the chromosomes: 15, 16, 17, and 18 -> includes the regions that have been selected for this experiment -> reads have been selected to be in this region -> simulate a target sequence -> the .bed that tell us that these are the regions we want to target with this protocol
+
+
+DNA_Repair_Genes.bed -> info on genes -> .bed file that may help us in the late analysis -> using VCF Tools and limit the analysis to these regions. We have the coordinates of DNA damage genes -> to annotate and give a name to the regions in which we see mutations or indels etc.
+
+
+
+less BEDCov.Control.CR.txt
+less BEDCov.Tumor.CR.txt
+
+Looking at the .txt we can see that we need to keep an eye on possible deletions and duplications
+
+Output file: same region of the .bed plus another column indicating the number of reads mapping in that region
+
 
 2) Realignment
  
 Realign the BAM - No input of known indels:
 a) Create the .intervals: 
-java -jar ../../Tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -o realigner.intervals -L ../../Annotations/CancerGenesSel.bed
+java -jar ../tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R ../Annotations/human_g1k_v37.fasta -I Tumor.sorted.bam -o realigner.intervals.Tumor -L Captured_Regions.bed
+
+
+java -jar ../tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R ../Annotations/human_g1k_v37.fasta -I Control.sorted.bam -o realigner.intervals.Control -L Captured_Regions.bed
 
 ---> -o is used to tell the software the name of the output file -> the output is a series of intervals
 ---> always same syntax
 ---> -R -> path of the reference (fasta of the human genome)
 
 b) Perform the realignemnt:
-java -jar ../../Tools/GenomeAnalysisTK.jar -T IndelRealigner -R ../../Annotations/human_g1k_v37.fasta -I Sample.sorted.bam -targetIntervals realigner.intervals -o Sample.sorted.realigned.bam -L ../../Annotations/CancerGenesSel.bed
+java -jar ../tools/GenomeAnalysisTK.jar -T IndelRealigner -R ../Annotations/human_g1k_v37.fasta -I Tumor.sorted.bam -targetIntervals realigner.intervals.Tumor -o Tumor.sorted.realigned.bam -L Captured_Regions.bed
+
+java -jar ../tools/GenomeAnalysisTK.jar -T IndelRealigner -R ../Annotations/human_g1k_v37.fasta -I Control.sorted.bam -targetIntervals realigner.intervals.Control -o Control.sorted.realigned.bam -L Captured_Regions.bed
 
 All the positions in which there is a hidden indel are now realigned -> all contained in the file .realigned.bam
 
----> we use the intervals using the option -targetIntervals
----> we obtained a realigned .bam file -> realignment in the regions of indels and regions that may hidden some indels
+c) Count how many reads were realigned:
 
-4) Count how many reads were realigned:
- samtools view Sample.sorted.realigned.bam | grep OC | wc -l
--> with samtools view we can look inside a .bam file
--> the flag OC stand for OriginalCigar -> we can use grap to perform pattern searching
--> we count the lines of teh outputs via wc -l -> total obtained: 616 -> corresponds to the number of reads that have been realigned.
+samtools view Tumor.sorted.realigned.bam | grep OC | wc -l
+
+number of reads that have been realigned: 
+
+samtools view Control.sorted.realigned.bam | grep OC | wc -l
+
+number of reads that have been realigned: 
 
 
 
-2) Quality control -> Recalibration:
+3) Quality control -> Recalibration:
 
 4 steps:
 
-1. BaseRecalibrator: model the error modes and recalibrate qualities. Its inputs are a BAM file and the known sites. → based on the covariates, generate a BaseRecalibrator Table that tells us how much correction was needed.
+a.) BaseRecalibrator: model the error modes and recalibrate qualities. Its inputs are a BAM file and the known sites. → based on the covariates, generate a BaseRecalibrator Table that tells us how much correction was needed.
 
-2. PrintReads: write recalibrated data to a BAM file thanks to the recalibration table produced in the previous step. Original qualities are retained with the OC flag.
+java -jar ../tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../Annotations/human_g1k_v37.fasta -I ../Realignment/Tumor.sorted.realigned.bam -knownSites ../Annotations/hapmap_3.3.b37.vcf -o recal.table.Tumor -L Captured_Regions.bed
 
-3. The process is repeated to build the after model to evaluate remaining error.
+java -jar ../tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../Annotations/human_g1k_v37.fasta -I ../Realignment/Control.sorted.realigned.bam -knownSites ../Annotations/hapmap_3.3.b37.vcf -o recal.table.Control -L Captured_Regions.bed
 
-4. AnalyzeCovariates: before and after plots are made based on recalibration tables.
+-> we limit the execution only to certain region of the genome -> specifically, it is a cancer genes region -> possible via the -L parameter
+-> In output we have a file called recalTable -> a text file we can explore: beginning with general info, going down in the file we have all the recalibration values for teh groups, with event type (M for Mismatches, D for deletion, I for insertions), there is also the info stratified by the scores. Plus, there is the empirical quality scores -> that usually is lower than the original quality score.
+
+b.) PrintReads: write recalibrated data to a BAM file thanks to the recalibration table produced in the previous step. Original qualities are retained with the OC flag.
+
+java -jar ../tools/GenomeAnalysisTK.jar -T PrintReads -R ../Annotations/human_g1k_v37.fasta -I ../Realignment/Tumor.sorted.realigned.bam -BQSR recal.table.Tumor -o Tumor.sorted.realigned.recalibrated.bam -L Captured_Regions.bed --emit_original_quals
+
+java -jar ../tools/GenomeAnalysisTK.jar -T PrintReads -R ../Annotations/human_g1k_v37.fasta -I ../Realignment/Control.sorted.realigned.bam -BQSR recal.table.Control -o Control.sorted.realigned.recalibrated.bam -L Captured_Regions.bed --emit_original_quals
+
+c.) The process is repeated to build the after model to evaluate remaining error.
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../Annotations/human_g1k_v37.fasta -I ../Realignment/Tumor.sorted.realigned.bam -knownSites ../Annotations/hapmap_3.3.b37.vcf -BQSR recal.table -o after_recal.table.Tumor -L Captured_Regions.bed
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../Annotations/human_g1k_v37.fasta -I ../Realignment/Control.sorted.realigned.bam -knownSites ../Annotations/hapmap_3.3.b37.vcf -BQSR recal.table -o after_recal.table.Control -L Captured_Regions.bed
+
+
+d.) AnalyzeCovariates: before and after plots are made based on recalibration tables.
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T AnalyzeCovariates -R ../Annotations/human_g1k_v37.fasta -before recal.table.Tumor -after after_recal.table.Tumor -csv recal.Tumor.csv -plots recal.Tumor.pdf
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T AnalyzeCovariates -R ../Annotations/human_g1k_v37.fasta -before recal.table.Control -after after_recal.table.Control -csv recal.Control.csv -plots recal.Control.pdf
+ -> we can have a look at the recal.pdf -> we can see that there are different context possibles -> some biases can be observed when dealing with machine artefacts -> we can see that the after calibration line is more uniform.
+
 
 We could filter for the quality?
+
+4) DUPLICATES
+
+NB FAI LA SOMATIC VARIANT CALLING -> PER GLI SNP SOLO SU NORMAL E PER SNV SU TUMOR -> COSI CONTROLLI CHE GLI SNV TROVATI NEL TUMOR NON FOSSERO GIA PRESENTI COME SNP

@@ -8,6 +8,7 @@ two methods
 6. Compare deduplication results before or after realignment and recalibration – Is consistent? Comment.
 
 
+
 DONE:
 Prepare the .bam file: sort + index
 - samtools sort Sample.bam > Sample.sorted.bam

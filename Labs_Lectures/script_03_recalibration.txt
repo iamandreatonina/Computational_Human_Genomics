@@ -14,7 +14,7 @@ Tasks
 COMMAND:
 java -jar ../../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../../Annotations/human_g1k_v37.fasta -I ../../02_Realignment/Data/Sample.sorted.realigned.bam -knownSites ../../Annotations/hapmap_3.3.b37.vcf -o recal.table -L ../../Annotations/CancerGenesSel.bed
 
--> we limit the execution only to certain region of teh genome -> specifically, it is a cancer genes region -> possible via the -L parameter
+-> we limit the execution only to certain region of the genome -> specifically, it is a cancer genes region -> possible via the -L parameter
 
 EXAMPLE USAGE:
 -I my_reads.bam \
