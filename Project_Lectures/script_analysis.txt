@@ -57,7 +57,7 @@ inser size standard deviation: 75.3 with an avarage insert size of 216.1
 
 
 c) Explore coverage statistics
-- Single base sum coverage per region:
+- Single base sum coverage per region -> samtools bedcov is used to have an idea on how many reads of the .bam map on the region kept in the .bed file:
 samtools bedcov Captured_Regions.bed Control.sorted.bam > BEDCov.Control.CR.txt
 samtools bedcov Captured_Regions.bed Tumor.sorted.bam > BEDCov.Tumor.CR.txt
 
