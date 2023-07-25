@@ -1,21 +1,156 @@
-1) Quality control -> Recalibration:
+samtools sort Control.bam > Control.sorted.bam
+samtools index Control.sorted.bam
 
-a) Base Recalibrator
 
--> COULD BE USEFUL: https://gatk.broadinstitute.org/hc/en-us/articles/360035890531-Base-Quality-Score-Recalibration-BQSR-
+samtools sort Tumor.bam > Tumor.sorted.bam
+samtools index Tumor.sorted.bam
 
-COMMAND:
-java -jar ../../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../../Annotations/human_g1k_v37.fasta -I ../../02_Realignment/Data/Sample.sorted.realigned.bam -knownSites ../../Annotations/hapmap_3.3.b37.vcf -o recal.table -L ../../Annotations/CancerGenesSel.bed
+----- Realignment ------
 
--> we can limit the execution only to certain region of teh genome -> specifically, it is a cancer genes region -> possible via the -L parameter
+java -jar ../tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R ../Annotations/human_g1k_v37.fasta -I Tumor.sorted.bam -o Tumor.realigner.intervals -L Captured_Regions.bed
 
-2) Creation of the new .bam file -> Print Reads
-java -jar ../../Tools/GenomeAnalysisTK.jar -T PrintReads -R ../../Annotations/human_g1k_v37.fasta -I ../../02_Realignment/Data/Sample.sorted.realigned.bam -BQSR recal.table -o Sample.sorted.realigned.recalibrated.bam -L ../../Annotations/CancerGenesSel.bed --emit_original_quals
+java -jar ../tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R ../Annotations/human_g1k_v37.fasta -I Control.sorted.bam -o Control.realigner.intervals -L Captured_Regions.bed
 
-3) Generate the after recalibration table -> passage needed to operate Analyzer Covariates -> BaseRecalibator 2 -> Recalibration table 2.
 
-java -jar ../../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../../Annotations/human_g1k_v37.fasta -I ../../02_Realignment/Data/Sample.sorted.realigned.bam -knownSites ../../Annotations/hapmap_3.3.b37.vcf -BQSR recal.table -o after_recal.table -L ../../Annotations/CancerGenesSel.bed
+java -jar ../tools/GenomeAnalysisTK.jar -T IndelRealigner -R ../Annotations/human_g1k_v37.fasta -I Tumor.sorted.bam -targetIntervals Tumor.realigner.intervals -o Tumor.sorted.realigned.bam -L Captured_Regions.bed
 
-4) Generate the plots -> create i outout a pdf with all the plots
+java -jar ../Tols/GenomeAnalysisTK.jar -T IndelRealigner -R ../Annotations/human_g1k_v37.fasta -I Control.sorted.bam -targetIntervals Control.realigner.intervals -o Control.sorted.realigned.bam -L Captured_Regions.bed
 
-java -jar ../../Tools/GenomeAnalysisTK.jar -T AnalyzeCovariates -R ../../Annotations/human_g1k_v37.fasta -before recal.table -after after_recal.table -csv recal.csv -plots recal.pdf
+----- Recalibration ------
+
+(1)
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../Annotations/human_g1k_v37.fasta -I Tumor.sorted.realigned.bam -knownSites ../Annotations/hapmap_3.3.b37.vcf -o Tumor.recal.table -L Captured_Regions.bed
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../Annotations/human_g1k_v37.fasta -I Control.sorted.realigned.bam -knownSites ../Annotations/hapmap_3.3.b37.vcf -o Control.recal.table -L Captured_Regions.bed\
+
+(2)
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T PrintReads -R ../Annotations/human_g1k_v37.fasta -I Tumor.sorted.realigned.bam -BQSR Tumor.recal.table -o Tumor.sorted.realigned.recalibrated.bam -L Captured_Regions.bed --emit_original_quals
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T PrintReads -R ../Annotations/human_g1k_v37.fasta -I Control.sorted.realigned.bam -BQSR Control.recal.table -o Control.sorted.realigned.recalibrated.bam -L Captured_Regions.bed --emit_original_quals
+
+(3)
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../Annotations/human_g1k_v37.fasta -I Tumor.sorted.realigned.bam -knownSites ../Annotations/hapmap_3.3.b37.vcf -BQSR Tumor.recal.table -o Tumor.after_recal.table -L Captured_Regions.bed
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R ../Annotations/human_g1k_v37.fasta -I Control.sorted.realigned.bam -knownSites ../Annotations/hapmap_3.3.b37.vcf -BQSR recal.table -o Control.after_recal.table -L Captured_Regions.bed
+
+
+(4)
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T AnalyzeCovariates -R ../Annotations/human_g1k_v37.fasta -before Tumor.recal.table -after Tumor.after_recal.table -csv recal.Tumor.csv -plots recal.Tumor.pdf
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T AnalyzeCovariates -R ../Annotations/human_g1k_v37.fasta -before Control.recal.table -after Control.after_recal.table -csv recal.Control.csv -plots recal.Control.pdf
+
+
+
+----- Duplicates -----
+
+(1)
+
+Abbiamo i .bai di Control.sorted.realigned.recalibrated.bam ??
+
+java -jar ../Tools/picard.jar MarkDuplicates I=Control.sorted.realigned.recalibrated.bam O=Control.sorted.realigned.recalibrated.debup.bam REMOVE_DUPLICATES=true TMP_DIR=/tmp METRICS_FILE=Control.picard.log ASSUME_SORTED=true
+
+java -jar ../Tools/picard.jar MarkDuplicates I=Tumor.sorted.realigned.recalibrated.bam O=Tumor.sorted.realigned.recalibrated.debup.bam REMOVE_DUPLICATES=true TMP_DIR=/tmp METRICS_FILE=Control.picard.log ASSUME_SORTED=true
+
+(2)
+
+samtools index Tumor.sorted.realigned.recalibrated.debup.bam
+
+samtools index Control.sorted.realigned.recalibrated.debup.bam
+
+
+----- Variant Calling ------
+
+(1)
+
+bcftools mpileup -Ou -a DP -f ../Annotations/human_g1k_v37.fasta Control.sorted.realigned.recalibrated.debup.bam | bcftools call -Ov -c -v > Control.BCF.vcf
+
+bcftools mpileup -Ou -a DP -f ../Annotations/human_g1k_v37.fasta Tumor.sorted.realigned.recalibrated.debup.bam | bcftools call -Ov -c -v > Tumor.BCF.vcf
+
+
+(2)
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T UnifiedGenotyper -R ../Annotations/human_g1k_v37.fasta -I Control.sorted.realigned.recalibrated.debup.bam -o Control.GATK.vcf -L Captured_Regions.bed
+
+java -jar ../Tools/GenomeAnalysisTK.jar -T UnifiedGenotyper -R ../Annotations/human_g1k_v37.fasta -I Tumor.sorted.realigned.recalibrated.debup.bam -o Tumor.GATK.vcf -LCaptured_Regions.bed
+
+
+(3)
+
+vcftools --minQ 20 --min-meanDP 30 --remove-indels --vcf Tumor.BCF.vcf --out Tumor.BCF --recode --recode-INFO-all
+
+vcftools --minQ 20 --min-meanDP 30 --remove-indels --vcf Control.BCF.vcf --out Tumor.BCF --recode --recode-INFO-all
+
+(4)
+
+vcftools --minQ 20  --min-meanDP 30 --remove-indels --vcf Control.GATK.vcf --out Control.GATK --recode --recode-INFO-all
+
+
+vcftools --minQ 20  --min-meanDP 30 --remove-indels --vcf Tumor.GATK.vcf --out Tumor.GATK --recode --recode-INFO-all
+
+(5)
+
+vcftools --vcf Control.BCF.recode.vcf --diff Control.GATK.recode.vcf --diff-site
+
+vcftools --vcf Tumor.BCF.recode.vcf --diff Tumor.GATK.recode.vcf --diff-site
+
+
+------ Variant Annotation ------
+
+
+(1)
+
+java -Xmx4g -jar ../Tools/snpEff/snpEff.jar -v hg19kg Control.BCF.recode.vcf -s Control.BCF.recode.ann.html > Control.BCF.recode.ann.vcf
+
+java -Xmx4g -jar ../Tools/snpEff/snpEff.jar -v hg19kg Tumor.BCF.recode.vcf -s Tumor.BCF.recode.ann.html > Tumor.BCF.recode.ann.vcf
+
+(2)
+
+java -Xmx4g -jar ../Tools/snpEff/snpEff.jar -v hg19kg Control.GATK.recode.vcf -s Control.GATK.recode.ann.html > Control.GATK.recode.ann.vcf
+
+
+java -Xmx4g -jar ../Tools/snpEff/snpEff.jar -v hg19kg Tumor.GATK.recode.vcf -s Tumor.GATK.recode.ann.html > Tumor.GATK.recode.ann.vcf
+
+(3)
+
+java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/hapmap_3.3.b37.vcf  Control.BCF.recode.ann.vcf > Control.BCF.recode.ann2.vcf
+
+java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/clinvar_Pathogenic.vcf Control.BCF.recode.ann2.vcf > Control.BCF.recode.ann3.vcf
+
+java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/clinvar_Pathogenic.vcf Control.GATK.recode.ann2.vcf > Control.GATK.recode.ann3.vcf
+
+java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/hapmap_3.3.b37.vcf  Control.GATK.recode.ann.vcf > Control.GATK.recode.ann2.vcf
+
+(4)
+
+java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/hapmap_3.3.b37.vcf  Tumor.recode.ann.vcf > Tumor.BCF.recode.ann2.vcf
+
+java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/clinvar_Pathogenic.vcf Tumor.BCF.recode.ann2.vcf > Tumor.BCF.recode.ann3.vcf
+
+java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/clinvar_Pathogenic.vcf Tumor.GATK.recode.ann2.vcf > Tumor.GATK.recode.ann3.vcf
+
+java -Xmx4g -jar ../Tools/snpEff/SnpSift.jar Annotate ../Annotations/hapmap_3.3.b37.vcf  Tumor.GATK.recode.ann.vcf > Tumor.GATK.recode.ann2.vcf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
