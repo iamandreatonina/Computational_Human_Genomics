@@ -1,0 +1,17 @@
+
+VCFtools - 0.1.15
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--vcf Control.VARSCAN.vcf
+	--recode-INFO-all
+	--max-meanDP 200
+	--min-meanDP 5
+	--out Control.VARSCAN
+	--recode
+	--remove-indels
+
+After filtering, kept 1 out of 1 Individuals
+Outputting VCF file...
+After filtering, kept 14936 out of a possible 15796 Sites
+Run Time = 0.00 seconds
