@@ -68,7 +68,7 @@ plot(sdundo.sample.segmented,plot.type="w")
 
 #############################
 ##
-## Load Real samples -> perform the analysis on real data 
+## Load Real samples -> perform the analysis on real data from a .csv
 log2data <- read.csv("AllLog2Sub.cn_medianCentered",sep="\t",header=F)
 # log2data is a dataframe containing 9029 observation with info on the position on the genome (in the chromosome) and annotations -> total columns equal to 430
 
