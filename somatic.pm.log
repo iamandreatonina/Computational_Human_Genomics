@@ -1,0 +1,17 @@
+
+VCFtools - 0.1.15
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--vcf somatic.pm.vcf
+	--recode-INFO-all
+	--max-meanDP 200
+	--min-meanDP 30
+	--out somatic.pm
+	--recode
+	--remove-indels
+
+After filtering, kept 2 out of 2 Individuals
+Outputting VCF file...
+After filtering, kept 10261 out of a possible 14522 Sites
+Run Time = 0.00 seconds
