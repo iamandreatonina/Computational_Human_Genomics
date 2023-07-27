@@ -4,7 +4,7 @@ library(TPES)
 
 setwd("~/Documents/HumanGenomics/10_PurityPloidyEstimation/")
 
-normal = fread("Normal.csv",data.table=F) # WE ADD OUR DATA
+normal = fread("Control.csv",data.table=F) # WE ADD OUR DATA
 normal$af = normal$altCount/normal$totalCount # WE CALCULATE MANUALLY TEH ALLELEIC FRACTION BASED ON TEH input data
 tumor = fread("Tumor.csv",data.table=F)
 tumor$af = tumor$altCount/tumor$totalCount

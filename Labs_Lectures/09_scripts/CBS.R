@@ -1,5 +1,5 @@
 library(DNAcopy)
-folder = "~/Documents/HumanGenomics/09_SomaticCopyNumberCalling/Data/"
+folder = ""
 cn <- read.table(file.path(folder,"SCNA.copynumber.called"),header=T) # loading the data
 
 pdf("~/Documents/HumanGenomics/09_SomaticCopyNumberCalling/Data/SegPlot.pdf")
