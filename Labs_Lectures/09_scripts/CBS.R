@@ -2,7 +2,7 @@ library(DNAcopy)
 folder = ""
 cn <- read.table(file.path(folder,"SCNA.copynumber.called"),header=T) # loading the data
 
-pdf("~/Documents/HumanGenomics/09_SomaticCopyNumberCalling/Data/SegPlot.pdf")
+#pdf("~/Documents/HumanGenomics/09_SomaticCopyNumberCalling/Data/SegPlot.pdf")
 
 plot(cn$raw_ratio,pch=".",ylim=c(-2.5,2.5)) # the data we are analyzing -> data with noise -> we can see by eye that there is a segmentation -> some values are from amplifications other from deletions
 plot(cn$adjusted_log_ratio,pch=".",ylim=c(-2.5,2.5)) # same as above, just looking at the log2 p_adjusted values

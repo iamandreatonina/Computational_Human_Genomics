@@ -1,7 +1,9 @@
 # The following table is formatted as tab separated values. 
 #GeneName	GeneId	TranscriptId	BioType	variants_impact_HIGH	variants_impact_LOW	variants_impact_MODERATE	variants_impact_MODIFIER	variants_effect_3_prime_UTR_variant	variants_effect_5_prime_UTR_premature_start_codon_gain_variant	variants_effect_5_prime_UTR_variant	variants_effect_downstream_gene_variant	variants_effect_intron_variant	variants_effect_missense_variant	variants_effect_non_coding_transcript_exon_variant	variants_effect_splice_acceptor_variant	variants_effect_splice_donor_variant	variants_effect_splice_region_variant	variants_effect_start_lost	variants_effect_stop_gained	variants_effect_stop_lost	variants_effect_stop_retained_variant	variants_effect_synonymous_variant	variants_effect_upstream_gene_variant
-	.3971	uc021sev.1		0	0	0	1	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0
-	.3972	uc010tyw.1		0	0	0	1	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0
+	
+.3971	uc021sev.1		0	0	0	1	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0
+	
+.3972	uc010tyw.1		0	0	0	1	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0
 	.3973	uc021sew.1		0	0	0	3	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	2
 	.3974	uc001ytf.1		0	1	0	3	0	0	0	0	1	0	3	0	0	1	0	0	0	0	0	0
 	.3975	uc010tyx.1		0	1	0	16	0	0	0	1	8	0	7	0	0	1	0	0	0	0	0	1
