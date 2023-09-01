@@ -1,2 +1,0 @@
-sample.id	pop	type	contribution
-Sample1	AFR	CLOSEST	EUR(19.84%)|EAS(19.56%)|SAS(18.05%)|AFR(42.55%)

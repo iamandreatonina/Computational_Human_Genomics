@@ -1,2 +1,0 @@
-sample.id	pop	type	contribution
-TCGA-A7-A4SE-Tumor	AFR	CLOSEST	EUR(19.67%)|EAS(19.2%)|SAS(18.11%)|AFR(43.03%)
