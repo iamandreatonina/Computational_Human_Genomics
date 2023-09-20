@@ -9,7 +9,6 @@ Project developed by:
 
 [Report]()
 
----
 
 ## Tasks
 In particular, the project is aimed at answering 10 specific tasks:
@@ -24,9 +23,8 @@ In particular, the project is aimed at answering 10 specific tasks:
  * Determine tumor purity and ploidy;
  * Determine the similarity of Tumor and Control samples.
 
----
 
-##Tools utilized 
+## Tools utilized 
 - [X] Samtools
 - [X] GATK 
 - [X] Picard
