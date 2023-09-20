@@ -13,3 +13,17 @@ In particular, the project is aimed at answering 10 specific tasks:
  * Determine which DNA repair genes overlap both germline heterozygous copy-number deletions and somatic point mutations;
  * Determine tumor purity and ploidy;
  * Determine the similarity of Tumor and Control samples.
+
+Tools utilized: 
+- [X] Samtools
+- [X] GATK 
+- [X] Picard
+- [X] BCFTOOLS
+- [X] SnpEff
+- [X] Varscan
+- [X] EthSEQ
+- [X] CBS
+- [X] DNACopy
+- [X] CLONET
+- [X] TPES
+- [X] SPIA
