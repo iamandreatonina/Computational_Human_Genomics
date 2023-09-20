@@ -1,9 +1,10 @@
 # Computational Human Genomics
-This project is part of the course in Computational Human Genomics, held by Dr.Yari Ciani and Prof. Francesca Demichelis, during the A.A. 2022-2023. We started from two BAM files (Tumor and matched Control), along with other files (reference genome, annotation files, ...) with the aim to perform Germline Variant Calling, Somatic Small and Copy-Number Variant Calling, Ancestry Analysis, and Tumor Ploidy and Purity estimation.
+This project is part of the course in Computational Human Genomics, held by Dr.Yari Ciani and Prof. Francesca Demichelis, during the A.A. 2022-2023. 
+This project aims to apply an example of human genomic workflow to a patient, characterizing both tumor and control samples. Thanks to the applied workflow we were able to characterize germline and somatic variants, determine the ancestry of the patient, and study the tumor ploidy and purity.
 
 In particular, the project is aimed at answering 10 specific tasks:
 
-    Explore statistics about the raw aligned reads contained in the two BAM files
+     - Explore statistics about the raw aligned reads contained in the two BAM files
 
     Perform realignment and recalibration on those
 
