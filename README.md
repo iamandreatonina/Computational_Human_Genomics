@@ -5,19 +5,11 @@ This project aims to apply an example of human genomic workflow to a patient, ch
 In particular, the project is aimed at answering 10 specific tasks:
  * Explore statistics about the raw aligned reads contained in the two BAM files 
  * Perform realignment and recalibration on those
-
-    Identify and annotate heterozygous SNPs
-
-    Determine the ancestry of the patients
-
-    Identify somatic copy number variants
-
-    Identify somatic point mutations
-
-    Determine how DNA Repair Genes have been impacted by germline CNVs and SNPs
-
-    Determine which DNA repair genes overlap both germline heterozygous copy-number deletions and somatic point mutations
-
-    Determine tumor purity and ploidy
-
-    Determine the similarity of Tumor and Control samples
+ * Identify and annotate heterozygous SNPs
+ * Determine the ancestry of the patients
+ * Identify somatic copy number variants
+ * Identify somatic point mutations
+ * Determine how DNA Repair Genes have been impacted by germline CNVs and SNPs
+ * Determine which DNA repair genes overlap both germline heterozygous copy-number deletions and somatic point mutations
+ * Determine tumor purity and ploidy
+ * Determine the similarity of Tumor and Control samples
