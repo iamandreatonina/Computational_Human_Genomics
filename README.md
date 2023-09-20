@@ -11,6 +11,7 @@ Project developed by:
 
 ---
 
+## Tasks
 In particular, the project is aimed at answering 10 specific tasks:
  * Explore statistics about the raw aligned reads contained in the two BAM files;
  * Perform realignment and recalibration on those;
@@ -25,7 +26,7 @@ In particular, the project is aimed at answering 10 specific tasks:
 
 ---
 
-Tools utilized: 
+##Tools utilized 
 - [X] Samtools
 - [X] GATK 
 - [X] Picard
