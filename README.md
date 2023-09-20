@@ -3,6 +3,7 @@ This project is part of the course in Computational Human Genomics, held by Dr.Y
 This project aims to apply an example of human genomic workflow to a patient, characterizing both tumor and control samples. Thanks to the applied workflow we were able to characterize germline and somatic variants, determine the ancestry of the patient, and study the tumor ploidy and purity.
 
 In particular, the project is aimed at answering 10 specific tasks:
+- Explore statistics about the raw aligned reads contained in the two BAM files 
 
      - Explore statistics about the raw aligned reads contained in the two BAM files
 
