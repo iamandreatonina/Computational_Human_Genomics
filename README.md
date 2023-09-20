@@ -2,13 +2,14 @@
 This project is part of the course in Computational Human Genomics, held by Dr.Yari Ciani and Prof. Francesca Demichelis, during the A.A. 2022-2023. 
 This project aims to apply an example of human genomic workflow to a patient, characterizing both tumor and control samples. Thanks to the applied workflow we were able to characterize germline and somatic variants, determine the ancestry of the patient, and study the tumor ploidy and purity.
 
+[Report](https://github.com/iamandreatonina/Computational_Human_Genomics/blob/main/Report_finale.pdf)
+
+## Authors
+
 Project developed by: 
   * Andrea Tonina  [@iamandreatonina](https://github.com/iamandreatonina)
   * Gloria Lugoboni [@GloriaLugoboni](https://github.com/GloriaLugoboni)
   * Lorenzo Santarelli [@Lor-Santa](https://github.com/Lor-Santa)
-
-[Report](https://github.com/iamandreatonina/Computational_Human_Genomics/blob/main/Report_finale.pdf)
-
 
 ## Tasks
 In particular, the project is aimed at answering 10 specific tasks:
@@ -22,7 +23,6 @@ In particular, the project is aimed at answering 10 specific tasks:
  * Determine which DNA repair genes overlap both germline heterozygous copy-number deletions and somatic point mutations;
  * Determine tumor purity and ploidy;
  * Determine the similarity of Tumor and Control samples.
-
 
 ## Tools utilized 
 - [X] Samtools
