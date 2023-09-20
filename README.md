@@ -7,7 +7,7 @@ Project developed by:
   * Gloria Lugoboni [@GloriaLugoboni](https://github.com/GloriaLugoboni)
   * Lorenzo Santarelli [@Lor-Santa](https://github.com/Lor-Santa)
 
-[Report](https://github.com/iamandreatonina/Computational_Human_Genomics/tree/main/)
+[Report](https://github.com/iamandreatonina/Computational_Human_Genomics/blob/main/Report_finale.pdf)
 
 
 ## Tasks
