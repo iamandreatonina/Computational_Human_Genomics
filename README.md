@@ -1,6 +1,6 @@
 # Computational Human Genomics
 This project is part of the course in Computational Human Genomics, held by Dr.Yari Ciani and Prof. Francesca Demichelis, during the A.A. 2022-2023. 
-This project aims to apply an example of human genomic workflow to a patient, characterizing both tumor and control samples. Thanks to the applied workflow we were able to characterize germline and somatic variants, determine the ancestry of the patient, and study the tumor ploidy and purity.
+This project aims to apply an example of human genomic workflow to a patient, characterizing both tumor and control samples. Thanks to the applied workflow we were able to characterize germline and somatic variants, determine the ancestry ethnicity of the patient, and study the tumor ploidy and purity.
 
 [Report](https://github.com/iamandreatonina/Computational_Human_Genomics/blob/main/Report_finale.pdf)
 
